@@ -40,6 +40,8 @@ ADMIN_EMAIL=admin@admin.com
 
 Place this into your index.ejs file `<script src="/bower_components/angular-cookies/angular-cookies.min.js"></script>`
 
+Inject `ngCookies` into your app.
+
 ##Configure Passport
 
 **create:** `./config/passport.ts`
