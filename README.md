@@ -20,6 +20,15 @@ If you don't have NVM (Node Version Manager) please install it
 
 **create** `.env`
 
+```
+MONGO_URI=mongodb://localhost:27017/passport-demo
+JWT_SECRET=SecretKey
+SESSION_SECRET=SecretKey
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=password
+ADMIN_EMAIL=admin@admin.com
+```
+
 ##Installation and Types
 `npm i --save connect-mongo express-session passport passport-http-bearer passport-local`
 
