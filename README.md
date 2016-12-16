@@ -52,6 +52,8 @@ passport.use(new LocalStrategy(function(username: String, password: string, done
 
 ```
 
+*note:* Please note this line `.select('-passwordHash -salt');`.  This will prevent your `passport.authenticate('bearer')` (*token checks*) from returning a passwordHash and salt.  !!!
+
 **require in:** `./app.ts`: 
 
 ```javascript
