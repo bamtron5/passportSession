@@ -7,4 +7,10 @@
 
 ##Configure Passport
 
-create `./config/passport.ts`
+create: `./config/passport.ts`
+require in `./app.ts`: 
+```javascript
+//config for passport login
+require("./config/passport");`
+```
+
