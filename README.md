@@ -95,7 +95,10 @@ Here is what the main server file should resemble.  Please read my comments and 
 * `import * as passport from 'passport';`
 * `import * as session from 'express-session';`
 * `const MongoStore = require('connect-mongo')(session);`
-```
+
+**create:** `./app.ts`
+
+```javacript
 import * as express from 'express';
 import * as path from 'path';
 import * as favicon from 'serve-favicon';
