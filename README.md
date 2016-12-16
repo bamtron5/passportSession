@@ -8,6 +8,7 @@
 ##Configure Passport
 
 create: `./config/passport.ts`
+
 require in `./app.ts`: 
 
 ```javascript
