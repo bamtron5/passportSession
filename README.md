@@ -1,6 +1,9 @@
 #Passport Local w/ Express-Session
 ##Prereq
 I assume you have a User model and a mongoose connection.
+You are on node engine `~6.9.1` || `<7.0.0`
+If you don't have NVM (Node Version Manager) please install it
+(NVM DOC)['https://github.com/creationix/nvm#nvmrc']
 
 ##Installation and Types
 `npm i --save connect-mongo express-session passport passport-http-bearer passport-local`
