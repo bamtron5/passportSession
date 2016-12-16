@@ -1,8 +1,8 @@
 #Passport Local w/ Express-Session
 ##Prereq
-I assume you have a User model and a mongoose connection.
-I assume are on node engine `~6.9.1` || `<7.0.0`.
-I assume you are using dotenv for development env.  If not:
+* I assume you have a User model and a mongoose connection
+* I assume are on node engine `~6.9.1` || `<7.0.0`
+* I assume you are using dotenv for development env.  If not:
 
 `npm install dotenv --save`
 
