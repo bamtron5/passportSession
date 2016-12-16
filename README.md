@@ -535,18 +535,21 @@ Please inspect my commits for the files.  If you having issues please contact me
 
 ## Testing
 *Login with username: `admin` and password `admin`*
+
 Then check your db to see the session table
 Check your application tab in your dev tools for the cookies `cid` and `token`
 Logout and maksure the session table has removed the record
 
 *Register a regular user*
+
 Login w/ this user
 Then check your db to see the session table
 Check your application tab in your dev tools for the cookies `cid` and `token`
 Logout and maksure the session table has removed the record
 
-## Middlechecks
+## Middleware checks
 *sample*
+
 `router.get('/stuff', passport.authenticate('bearer'), function(req, res, next){})`
 this would return 401 if unauthenticated
 
