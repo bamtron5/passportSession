@@ -30,9 +30,9 @@ ADMIN_EMAIL=admin@admin.com
 ```
 
 ##Installation and Types
-`npm i --save connect-mongo express-session passport passport-http-bearer passport-local`
+`npm i --save connect-mongo express-session passport passport-http-bearer passport-local jsonwebtoken`
 
-`npm i --save @types/connect-mongo @types/express-session @types/passport @types/passport-http-bearer @types/passport-local`
+`npm i --save @types/connect-mongo @types/express-session @types/passport @types/passport-http-bearer @types/passport-local @types/jsonwebtoken`
 
 ##Configure Passport
 
