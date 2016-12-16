@@ -534,7 +534,7 @@ namespace passportDemo.Controllers {
 
 ## Add Angular view files
 **create:** `home.html` `login.html` `register.html` and `main.html`
-Please inspect my commits for the files.  If you having issues please contact me.
+Please inspect my commits for the files.  If you're having issues please contact me.
 
 ## Testing
 *Login with username: `admin` and password `admin`*
