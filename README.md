@@ -1,5 +1,5 @@
 #Passport Local w/ Express-Session
-Passport is great.  But without some kind of localStorage or cookieStorage you will either be sending token in req params.  Express-Session will supply a cid cookie `connectionId`, a token cookie from jwt, and a mongo table that will track user sessions in your DB.  This give your persistance in the client and tracking and in the DB if need be.  
+Passport is great for middle and configuration.  Express-Session will supply a cid cookie `connectionId`, a token cookie from jwt, and a mongo table that will track user sessions in your DB.  This gives your app persistance in the client and tracking in the DB if need be.  
 
 ##Prereq
 * I assume you have a User model and a mongoose connection
