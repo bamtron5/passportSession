@@ -308,6 +308,7 @@ router.get('/Logout/Local', function(req, res, next) {
 
 export = router;
 ```
+*note:* Passport should login, then session should be saved in db.  Session is destroyed and passports logs out on logout.
 
 ## Angular App
 ```javascript
