@@ -554,6 +554,7 @@ this would return 401 if unauthenticated
 
 * TODO
   * API should check user roles
+  * Support for localStorage
 
 ![](https://media.giphy.com/media/xT9DPQvQ4wuYAbCRtC/giphy.gif "")
 
