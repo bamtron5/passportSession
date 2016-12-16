@@ -44,7 +44,6 @@ Place this into your index.ejs file `<script src="/bower_components/angular-cook
 
 **create:** `./config/passport.ts`
 
-**edit:** `./config/passport.ts`
 ```javascript
 import * as passport from 'passport';
 import * as mongoose from 'mongoose';
