@@ -134,3 +134,5 @@ UserSchema.method('generateJWT', function() {
 export default mongoose.model<IUser>("User", UserSchema);
 
 ```
+
+This is not just a model.  Methods are associated with the User model to assist the process of validating passwords, setting passwords hashes, and signing tokens.
