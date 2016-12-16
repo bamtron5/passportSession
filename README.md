@@ -1,4 +1,6 @@
 #Passport Local w/ Express-Session
+##Prereq
+I assume you have a User model and a mongoose connection.
 
 ##Installation and Types
 `npm i --save connect-mongo express-session passport passport-http-bearer passport-local`
