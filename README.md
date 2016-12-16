@@ -98,7 +98,7 @@ Here is what the main server file should resemble.  Please read my comments and 
 
 **create:** `./app.ts`
 
-```javacript
+```javascript
 import * as express from 'express';
 import * as path from 'path';
 import * as favicon from 'serve-favicon';
