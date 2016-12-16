@@ -554,7 +554,8 @@ Logout and maksure the session table has removed the record
 *sample*
 
 `router.get('/stuff', passport.authenticate('bearer'), function(req, res, next){})`
-this would return 401 if unauthenticated
+
+this would return `401` if unauthenticated
 
 * TODO
   * API should check user roles
