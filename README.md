@@ -81,12 +81,98 @@ passport.use(new LocalStrategy(function(username: String, password: string, done
 
 *note:* Please note this line `.select('-passwordHash -salt');`.  This will prevent your `passport.authenticate('bearer')` (*token checks*) from returning a passwordHash and salt.  !!!
 
-**require in:** `./app.ts`: 
+*note:* Passport is useful middle ware to check the token before routing.  During this time it will also set `req.user`.  The next call in the stack can be checked for the user by req.  
 
-```javascript
-//config for passport login
-require("./config/passport");`
+*note* Passport `BearerStrategy` has access to your server token.  This will be set in our `/api/Local/Login` method.
+
+##Configure your Session
+Here is what the main server file should resemble.  Please read my comments and note the imports of 
+* `import * as passport from 'passport';`
+* `import * as session from 'express-session';`
+* `const MongoStore = require('connect-mongo')(session);`
 ```
+import * as express from 'express';
+import * as path from 'path';
+import * as favicon from 'serve-favicon';
+import * as logger from 'morgan';
+import * as bodyParser from 'body-parser';
+import * as ejs from 'ejs';
+import * as mongoose from 'mongoose';
+import * as passport from 'passport';
+import * as session from 'express-session';
+const MongoStore = require('connect-mongo')(session);
+import routes from './routes/index';
+import User from './models/User';
+
+//create the app
+let app = express();
+
+//load your env vars
+if (app.get('env') === 'development') {
+  let dotenv = require('dotenv');
+  dotenv.load();
+}
+
+//config for passport login
+require("./config/passport");
+
+//config req.session your session
+app.set('trust proxy', 1); // trust first proxy
+let sess = {
+  maxAge: 172800000, // 2 days
+  secure: false,
+  httpOnly: true
+}
+
+//set to secure in production
+if (app.get('env') === 'production') {
+  sess.secure = true // serve secure cookies
+}
+
+//use session config
+app.use(session({
+  cookie: sess,
+  secret: process.env.SESSION_SECRET, // can support an array
+  store: new MongoStore({
+    url: process.env.MONGO_URI
+  }),
+  unset: 'destroy',
+  resave: false,
+  saveUninitialized: false //if nothing has changed.. do not restore cookie
+}));
+
+//connect to DB
+let dbc = mongoose.connect(process.env.MONGO_URI);
+
+//Seed an admin user
+mongoose.connection.on('connected', () => {
+  User.findOne({username: 'admin'}, (err, user) => {
+    if(err) return;
+    if(user) return;
+    if(!user)
+      var admin = new User();
+      admin.email = process.env.ADMIN_EMAIL;
+      admin.username = process.env.ADMIN_USERNAME;
+      admin.setPassword(process.env.ADMIN_PASSWORD);
+      admin.roles = ['user', 'admin'];
+      admin.save();
+  });
+});
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+//initializer methods for express
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(passport.initialize());
+app.use(bodyParser.urlencoded({ extended: false }));
+...
+
+```
+*note* init passport with this line `app.use(passport.initialize());`
+*note* `sess.secure` will set our secure flag on https servers for deployment.
 
 ## User Model
 ```javascript
@@ -137,6 +223,7 @@ export default mongoose.model<IUser>("User", UserSchema);
 
 This is not just a model.  Methods are associated with the User model to assist the process of validating passwords, setting passwords hashes, and signing tokens.
 
+## Users API
 
 **create:** `./api/users.ts`
 ```javascript
@@ -204,3 +291,4 @@ router.get('/Logout/Local', function(req, res, next) {
 export = router;
 
 ```
+*note* `/api/currentuser` will inspect the token and return the user.  It has a callback to override a `401` server status i.e. `UNAUTHORIZED REQUEST` because this method is merely for token inspection and the status of the user session.
