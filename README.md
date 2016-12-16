@@ -36,6 +36,10 @@ ADMIN_EMAIL=admin@admin.com
 
 `npm i --save @types/connect-mongo @types/express-session @types/passport @types/passport-http-bearer @types/passport-local @types/jsonwebtoken @types/crypto`
 
+`bower i --save angular-cookies`
+
+Place this into your index.ejs file `<script src="/bower_components/angular-cookies/angular-cookies.min.js"></script>`
+
 ##Configure Passport
 
 **create:** `./config/passport.ts`
@@ -294,3 +298,238 @@ export = router;
 
 ```
 *note* `/api/currentuser` will inspect the token and return the user.  It has a callback to override a `401` server status i.e. `UNAUTHORIZED REQUEST` because this method is merely for token inspection and the status of the user session.
+
+## User Service
+```javascript
+namespace passportDemo.Services {
+
+    export class UserService {
+      private LoginResource;
+      private LogoutResource;
+      private RegisterResource;
+      public UserResource;
+      private isLoggedIn;
+
+      public login(user) {
+        return this.LoginResource.save(user).$promise;
+      }
+
+      public logout() {
+        return this.LogoutResource.get().$promise;
+      }
+
+      public register(user) {
+        return this.RegisterResource.save(user).$promise;
+      }
+
+      public getUser(id) {
+        return this.UserResource.get(id).$promise;
+      }
+
+      public getCurrentUser() {
+        return this.$resource('/api/currentuser').get().$promise;
+      }
+
+      constructor(private $resource: ng.resource.IResourceService) {
+
+        this.LogoutResource = $resource('/api/Logout/Local');
+        this.LoginResource = $resource('/api/Login/Local');
+        this.RegisterResource = $resource('/api/Register');
+        this.UserResource = $resource('/api/users/:id');
+      }
+    }
+
+    angular.module('passportDemo').service('UserService', UserService);
+}
+```
+
+## Angular App
+```javascript
+namespace passportDemo {
+  //TODO components
+  angular.module('passportDemo', ['ui.router', 'ngResource', 'ngCookies'])
+    .config((
+      $resourceProvider: ng.resource.IResourceServiceProvider,
+      $stateProvider: ng.ui.IStateProvider,
+      $urlRouterProvider: ng.ui.IUrlRouterProvider,
+      $locationProvider: ng.ILocationProvider,
+      $httpProvider: ng.IHttpProvider
+    ) => {
+      // Define routes
+      //
+      $stateProvider
+        .state('main', {
+          url: '',
+          abstract: true,
+          templateUrl: '/ngApp/views/main.html',
+          controller: passportDemo.Controllers.MainController,
+          controllerAs: 'vm',
+          data: {
+            currentUser: new Promise(() => {}) //RESOLVED by MainController to state.current.data.currentUser
+          }
+        })
+        .state('main.home', {
+          url: '/',
+          parent: 'main',
+          templateUrl: '/ngApp/views/home.html',
+          controller: passportDemo.Controllers.HomeController,
+          controllerAs: 'vm'
+        })
+        .state('main.register', {
+          url: '/register',
+          templateUrl: '/ngApp/views/register.html',
+          controller: passportDemo.Controllers.UserController,
+          controllerAs: 'vm'
+        })
+        .state('main.login', {
+          url: '/login',
+          templateUrl: '/ngApp/views/login.html',
+          controller: passportDemo.Controllers.UserController,
+          controllerAs: 'vm'
+        })
+        .state('notFound', {
+          url: '/notFound',
+          templateUrl: '/ngApp/views/notFound.html'
+        });
+
+      // Handle request for non-existent route
+      $urlRouterProvider.otherwise('/notFound');
+
+      // Enable HTML5 navigation
+      $locationProvider.html5Mode(true);
+
+      //for authInterceptor factory
+      $httpProvider.interceptors.push('authInterceptor');
+    }).factory('authInterceptor',
+      ['$q', '$cookies', '$location',
+      function ($q, $cookies, $location) {
+      return {
+        // Add authorization token to headers PER req
+        request: function (config) {
+          config.headers = config.headers || {};
+          if ($cookies.get('token')) {
+            config.headers.Authorization = 'Bearer ' + $cookies.get('token');
+          }
+          return config;
+        },
+
+        // Intercept 401s/500s and redirect you to login
+        responseError: function(response) {
+          if(response.status === 401) {
+            // good place to explain to the user why or redirect
+            console.info(`this account needs to authenticate to ${response.config.method} ${response.config.url}`);
+          }
+          if(response.status === 403) {
+            alert('unauthorized permission for your account.');
+            // good place to explain to the user why or redirect
+            // remove any stale tokens
+            return $q.reject(response);
+          } else {
+            return $q.reject(response);
+          }
+        }
+      }
+    }])
+    .run([
+      '$rootScope', '$location',
+      function($rootScope, $location) {
+      // Redirect to login if route requires auth and you're not logged in
+      $rootScope.$on('$stateChangeStart', function (event, next) {
+        // console.log(`GOING TO: ${next.url}`);
+      });
+  }]);
+}
+```
+
+*note* we have created an `abstract` state called `main`.  ALL other states will inherit this.  It `$state.current.data.currentUser` is a promise that can be resolved in the `MainController` by our `/api/currentuser` method.
+
+*note* authInterceptor will set `req.header` with `Bearer: ` `tokenvalue`.  Also a great way for angular to redirect certain server statuses like `401 UNAUTHORIZED` or `403 FORBIDDEN`
+
+## Controllers
+```javascript
+namespace passportDemo.Controllers {
+  export class MainController {
+    public currentUser;
+    public self = this;
+
+    constructor(
+      private UserService: passportDemo.Services.UserService,
+      private $state: ng.ui.IStateService,
+      private $cookies: ng.cookies.ICookiesService,
+      private $q: ng.IQService
+    ) {
+      $state.current.data.currentUser = $q.defer();
+
+      this.UserService.getCurrentUser().then((user) => {
+        this.currentUser = user;
+        $state.current.data.currentUser.resolve(user);
+      }).catch(() => {
+        this.currentUser = false;
+        $state.current.data.currentUser.reject(false);
+      });
+    }
+
+    logout() {
+      this.UserService.logout().then(() => {
+        this.$cookies.remove('token');
+        this.$state.go('main.home', null, {reload: true, notify:true});
+      }).catch(() => {
+        throw new Error('Unsuccessful logout');
+      });
+    }
+  }
+
+  export class HomeController {
+    public currentUser;
+    constructor(
+      private $state: ng.ui.IStateService
+    ) {
+      $state.current.data.currentUser.promise.then((user) => {
+        this.currentUser = user;
+      }).catch((user) => {
+        this.currentUser = user;
+      });
+    }
+  }
+
+  export class UserController {
+    public user;
+    public currentUser;
+    public isLoggedIn;
+
+    public login(user) {
+      this.UserService.login(user).then((res) => {
+        this.$cookies.put('token', res.token);
+        this.$state.go('main.home', null, {reload: true, notify:true});
+      }).catch((err) => {
+        alert('Bunk login, please try again.');
+      });
+    }
+
+    public register(user) {
+      this.UserService.register(user).then((res) => {
+        this.$state.go('main.login');
+      }).catch((err) => {
+        alert('Registration error: please try again.');
+      });
+    }
+
+    constructor(
+      private UserService:passportDemo.Services.UserService,
+      private $state: ng.ui.IStateService,
+      private $rootScope: ng.IRootScopeService,
+      private $cookies: ng.cookies.ICookiesService,
+      private $scope: ng.IScope
+    ) {
+    }
+  }
+}
+```
+
+* `$q` is used to resolve the promise from state so all sub controllers can inherit this state asynchronously.
+* During the login and logout phases we are adding and removing the cookie on client.
+
+## Add Angular view files
+**create:** `home.html` `login.html` `register.html` and `main.html`
+Please inspect my commits for the files.  If you having issues please contact me.
+![](https://media.giphy.com/media/xT9DPQvQ4wuYAbCRtC/giphy.gif "")
