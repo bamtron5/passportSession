@@ -19,6 +19,8 @@ router.get('/currentuser', (req, res, next) => {
   passport.authenticate('bearer', function(err, user) {
     if (err) return next(err);
     if (!user) return res.status(200).json({});
+    console.log(req.isAuthenticated());
+
     return res.status(200).json(user);
   })(req, res, next);
 });
@@ -43,9 +45,16 @@ router.post('/Login/Local', function(req, res, next) {
     if(err) return next(err);
     if(user) {
       let token = user.generateJWT();
-      return res.json({ token: token});
+
+      return req.logIn(user, (err) => {
+        if (err) res.status(500).json({message: 'login failed'});
+        return req.session.save(function (err){
+          if (err) res.status(500).json({message: 'session failed'});
+          return res.json({ token: token, isAuthenticated: req.isAuthenticated()});
+        });
+      });
     }
-      return res.status(400).json(info);
+    return res.status(400).json(info);
   })(req, res, next);
 });
 
@@ -55,7 +64,7 @@ router.get('/Logout/Local', function(req, res, next) {
   req.session.destroy((err) => {
     if (err) return res.status(500).json({message: 'still authenticated, please try again.'});
     req.user = null;
-    return res.redirect('/');
+    return res.json({isAuthenticated: req.isAuthenticated()});
   });
 });
 

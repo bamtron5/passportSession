@@ -45,12 +45,10 @@ var passportDemo;
         }());
         Controllers.HomeController = HomeController;
         var UserController = (function () {
-            function UserController(UserService, $state, $rootScope, $cookies, $scope) {
+            function UserController(UserService, $state, $cookies) {
                 this.UserService = UserService;
                 this.$state = $state;
-                this.$rootScope = $rootScope;
                 this.$cookies = $cookies;
-                this.$scope = $scope;
             }
             UserController.prototype.login = function (user) {
                 var _this = this;

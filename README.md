@@ -91,7 +91,7 @@ passport.use(new LocalStrategy(function(username: String, password: string, done
 *note:* Passport `BearerStrategy` has access to your server token.  This token will be set in our `/api/Local/Login` method.
 
 ##Configure your Session
-Here is what the main server file should resemble.  Please read my comments and note the imports of 
+Here is what the main server file should resemble.  Please read my comments and note the imports of
 * `import * as passport from 'passport';`
 * `import * as session from 'express-session';`
 * `const MongoStore = require('connect-mongo')(session);`
@@ -257,6 +257,8 @@ router.get('/currentuser', (req, res, next) => {
   passport.authenticate('bearer', function(err, user) {
     if (err) return next(err);
     if (!user) return res.status(200).json({});
+    console.log(req.isAuthenticated());
+
     return res.status(200).json(user);
   })(req, res, next);
 });
@@ -281,9 +283,16 @@ router.post('/Login/Local', function(req, res, next) {
     if(err) return next(err);
     if(user) {
       let token = user.generateJWT();
-      return res.json({ token: token});
+
+      return req.logIn(user, (err) => {
+        if (err) res.status(500).json({message: 'login failed'});
+        return req.session.save(function (err){
+          if (err) res.status(500).json({message: 'session failed'});
+          return res.json({ token: token, isAuthenticated: req.isAuthenticated()});
+        });
+      });
     }
-      return res.status(400).json(info);
+    return res.status(400).json(info);
   })(req, res, next);
 });
 
@@ -293,57 +302,11 @@ router.get('/Logout/Local', function(req, res, next) {
   req.session.destroy((err) => {
     if (err) return res.status(500).json({message: 'still authenticated, please try again.'});
     req.user = null;
-    return res.redirect('/');
+    return res.json({isAuthenticated: req.isAuthenticated()});
   });
 });
 
 export = router;
-
-```
-*note:* `/api/currentuser` will inspect the token and return the user.  It has a callback to override a `401` server status i.e. `UNAUTHORIZED REQUEST` because this method is merely for token inspection and the status of the user session.
-
-## User Service
-```javascript
-namespace passportDemo.Services {
-
-    export class UserService {
-      private LoginResource;
-      private LogoutResource;
-      private RegisterResource;
-      public UserResource;
-      private isLoggedIn;
-
-      public login(user) {
-        return this.LoginResource.save(user).$promise;
-      }
-
-      public logout() {
-        return this.LogoutResource.get().$promise;
-      }
-
-      public register(user) {
-        return this.RegisterResource.save(user).$promise;
-      }
-
-      public getUser(id) {
-        return this.UserResource.get(id).$promise;
-      }
-
-      public getCurrentUser() {
-        return this.$resource('/api/currentuser').get().$promise;
-      }
-
-      constructor(private $resource: ng.resource.IResourceService) {
-
-        this.LogoutResource = $resource('/api/Logout/Local');
-        this.LoginResource = $resource('/api/Login/Local');
-        this.RegisterResource = $resource('/api/Register');
-        this.UserResource = $resource('/api/users/:id');
-      }
-    }
-
-    angular.module('passportDemo').service('UserService', UserService);
-}
 ```
 
 ## Angular App
@@ -520,9 +483,7 @@ namespace passportDemo.Controllers {
     constructor(
       private UserService:passportDemo.Services.UserService,
       private $state: ng.ui.IStateService,
-      private $rootScope: ng.IRootScopeService,
-      private $cookies: ng.cookies.ICookiesService,
-      private $scope: ng.IScope
+      private $cookies: ng.cookies.ICookiesService
     ) {
     }
   }
@@ -562,4 +523,3 @@ this would return `401` if unauthenticated
   * Support for localStorage
 
 ![](https://media.giphy.com/media/xT9DPQvQ4wuYAbCRtC/giphy.gif "")
-

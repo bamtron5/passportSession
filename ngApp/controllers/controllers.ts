@@ -68,9 +68,7 @@ namespace passportDemo.Controllers {
     constructor(
       private UserService:passportDemo.Services.UserService,
       private $state: ng.ui.IStateService,
-      private $rootScope: ng.IRootScopeService,
-      private $cookies: ng.cookies.ICookiesService,
-      private $scope: ng.IScope
+      private $cookies: ng.cookies.ICookiesService
     ) {
     }
   }
