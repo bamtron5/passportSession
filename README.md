@@ -493,8 +493,8 @@ namespace passportDemo.Controllers {
 }
 ```
 
-*`$q` is used to resolve the promise from state so all sub controllers can inherit this state asynchronously.
-*During the login and logout phases we are adding and removing the cookie on client.
+* `$q` is used to resolve the promise from state so all sub controllers can inherit this state asynchronously.
+* During the login and logout phases we are adding and removing the cookie on client.
 
 ## Add Angular view files
 **create:** `home.html` `login.html` `register.html` and `main.html`
@@ -509,10 +509,10 @@ Logout and maksure the session table has removed the record
 
 *Register a regular user*
 
-Login w/ this user
-Then check your db to see the session table
-Check your application tab in your dev tools for the cookies `cid` and `token`
-Logout and maksure the session table has removed the record
+*Login w/ this user
+*Then check your db to see the session table
+*Check your application tab in your dev tools for the cookies `cid` and `token`
+*Logout and maksure the session table has removed the record
 
 ## Middleware checks
 *sample*
