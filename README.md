@@ -89,7 +89,7 @@ passport.use(new LocalStrategy(function(username: String, password: string, done
 
 *note:* Passport is useful middle ware to check the token before routing.  During this time it will also set `req.user`.  The next call in the stack can be checked for the user by req.  
 
-*note* Passport `BearerStrategy` has access to your server token.  This token will be set in our `/api/Local/Login` method.
+*note:* Passport `BearerStrategy` has access to your server token.  This token will be set in our `/api/Local/Login` method.
 
 ##Configure your Session
 Here is what the main server file should resemble.  Please read my comments and note the imports of 
@@ -177,8 +177,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 ...
 
 ```
-*note* init passport with this line `app.use(passport.initialize());`
-*note* `sess.secure` will set our secure flag on https servers for deployment.
+*note:* init passport with this line `app.use(passport.initialize());`
+*note:* `sess.secure` will set our secure flag on https servers for deployment.
 
 ## User Model
 ```javascript
@@ -297,7 +297,7 @@ router.get('/Logout/Local', function(req, res, next) {
 export = router;
 
 ```
-*note* `/api/currentuser` will inspect the token and return the user.  It has a callback to override a `401` server status i.e. `UNAUTHORIZED REQUEST` because this method is merely for token inspection and the status of the user session.
+*note:* `/api/currentuser` will inspect the token and return the user.  It has a callback to override a `401` server status i.e. `UNAUTHORIZED REQUEST` because this method is merely for token inspection and the status of the user session.
 
 ## User Service
 ```javascript
@@ -441,9 +441,9 @@ namespace passportDemo {
 }
 ```
 
-*note* we have created an `abstract` state called `main`.  ALL other states will inherit this.  It `$state.current.data.currentUser` is a promise that can be resolved in the `MainController` by our `/api/currentuser` method.
+*note:* we have created an `abstract` state called `main`.  ALL other states will inherit this.  It `$state.current.data.currentUser` is a promise that can be resolved in the `MainController` by our `/api/currentuser` method.
 
-*note* authInterceptor will set `req.header` with `Bearer: ` `tokenvalue`.  Also a great way for angular to redirect certain server statuses like `401 UNAUTHORIZED` or `403 FORBIDDEN`
+*note:* authInterceptor will set `req.header` with `Bearer: ` `tokenvalue`.  Also a great way for angular to redirect certain server statuses like `401 UNAUTHORIZED` or `403 FORBIDDEN`
 
 ## Controllers
 ```javascript
