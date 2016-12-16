@@ -532,4 +532,28 @@ namespace passportDemo.Controllers {
 ## Add Angular view files
 **create:** `home.html` `login.html` `register.html` and `main.html`
 Please inspect my commits for the files.  If you having issues please contact me.
+
+## Testing
+*Login with username: `admin` and password `admin`*
+Then check your db to see the session table
+Check your application tab in your dev tools for the cookies `cid` and `token`
+Logout and maksure the session table has removed the record
+
+*Register a regular user*
+Login w/ this user
+Then check your db to see the session table
+Check your application tab in your dev tools for the cookies `cid` and `token`
+Logout and maksure the session table has removed the record
+
+## Middlechecks
+*sample*
+`router.get('/stuff', passport.authenticate('bearer'), function(req, res, next){})`
+this would return 401 if unauthenticated
+
 ![](https://media.giphy.com/media/xT9DPQvQ4wuYAbCRtC/giphy.gif "")
+
+* TODO
+  * API should check user roles
+
+![](https://media.giphy.com/media/xT9DPQvQ4wuYAbCRtC/giphy.gif "")
+
