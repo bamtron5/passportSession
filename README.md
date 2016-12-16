@@ -503,16 +503,16 @@ Please inspect my commits for the files.  If you're having issues please contact
 ## Testing
 *Login with username: `admin` and password `password`*
 
-Then check your db to see the session table
-Check your application tab in your dev tools for the cookies `cid` and `token`
-Logout and maksure the session table has removed the record
+* Then check your db to see the session table
+* Check your application tab in your dev tools for the cookies `cid` and `token`
+* Logout and maksure the session table has removed the record
 
 *Register a regular user*
 
-*Login w/ this user
-*Then check your db to see the session table
-*Check your application tab in your dev tools for the cookies `cid` and `token`
-*Logout and maksure the session table has removed the record
+* Login w/ this user
+* Then check your db to see the session table
+* Check your application tab in your dev tools for the cookies `cid` and `token`
+* Logout and maksure the session table has removed the record
 
 ## Middleware checks
 *sample*
