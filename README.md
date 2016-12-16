@@ -85,7 +85,7 @@ passport.use(new LocalStrategy(function(username: String, password: string, done
 
 *note:* Passport is useful middle ware to check the token before routing.  During this time it will also set `req.user`.  The next call in the stack can be checked for the user by req.  
 
-*note* Passport `BearerStrategy` has access to your server token.  This will be set in our `/api/Local/Login` method.
+*note* Passport `BearerStrategy` has access to your server token.  This token will be set in our `/api/Local/Login` method.
 
 ##Configure your Session
 Here is what the main server file should resemble.  Please read my comments and note the imports of 
