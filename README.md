@@ -1,9 +1,24 @@
 #Passport Local w/ Express-Session
 ##Prereq
 I assume you have a User model and a mongoose connection.
-You are on node engine `~6.9.1` || `<7.0.0`
+I assume are on node engine `~6.9.1` || `<7.0.0`
+I assume you are using dotenv for development env.  If not:
+
+`npm install dotenv --save`
+
+```javascript
+if (app.get('env') === 'development') {
+  let dotenv = require('dotenv');
+  dotenv.load();
+}
+```
+
 If you don't have NVM (Node Version Manager) please install it
-(NVM DOC)['https://github.com/creationix/nvm#nvmrc']
+[NVM Docs on .nvmrc](https://github.com/creationix/nvm#nvmrc)
+
+**create** `.nvmrc` and add `lts/*`.  Which stands for latest.
+
+**create** `.env`
 
 ##Installation and Types
 `npm i --save connect-mongo express-session passport passport-http-bearer passport-local`
