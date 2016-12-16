@@ -18,19 +18,19 @@ var passportDemo;
             parent: 'main',
             templateUrl: '/ngApp/views/home.html',
             controller: passportDemo.Controllers.HomeController,
-            controllerAs: 'controller'
+            controllerAs: 'vm'
         })
             .state('main.register', {
             url: '/register',
             templateUrl: '/ngApp/views/register.html',
             controller: passportDemo.Controllers.UserController,
-            controllerAs: 'controller'
+            controllerAs: 'vm'
         })
             .state('main.login', {
             url: '/login',
             templateUrl: '/ngApp/views/login.html',
             controller: passportDemo.Controllers.UserController,
-            controllerAs: 'controller'
+            controllerAs: 'vm'
         })
             .state('notFound', {
             url: '/notFound',

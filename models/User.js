@@ -7,10 +7,7 @@ var UserSchema = new mongoose.Schema({
     email: { type: String, unique: true, lowercase: true },
     passwordHash: String,
     salt: String,
-    id: { type: String, getter: function (val) { return this._id.toString(); }, unique: true },
-    token: String
-}, {
-    id: false
+    roles: { type: Array, default: ['user'] }
 });
 UserSchema.method('setPassword', function (password) {
     this.salt = crypto.randomBytes(16).toString('hex');
@@ -27,10 +24,6 @@ UserSchema.method('generateJWT', function () {
         username: this.username,
         email: this.email
     }, process.env.JWT_SECRET, { expiresIn: '2 days' });
-});
-UserSchema.pre('save', function (next) {
-    this.id = this._id;
-    next();
 });
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = mongoose.model("User", UserSchema);

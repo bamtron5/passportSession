@@ -5,27 +5,24 @@ let BearerStrategy = require('passport-http-bearer').Strategy;
 import User from '../models/User';
 import * as jwt from 'jsonwebtoken';
 
-
 passport.serializeUser(function(user, done) {
-  console.log('serializeUser', user);
+  // console.log('serializeUser', user);
   done(null, user);
 });
 
 passport.deserializeUser(function(obj, done) {
-  console.log('deserializeUser', obj);
+  // console.log('deserializeUser', obj);
   done(null, obj);
 });
 
 passport.use(new BearerStrategy(
   function(token, done) {
     let user = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(user);
     User.findOne({ username: user.username }, function (err, user) {
-      console.log('bearer user', user);
       if (err) { return done(err); }
       if (!user) { return done(null, false); }
-      return done(null, user, { scope: 'all' });
-    });
+      return done(null, user);
+    }).select('-passwordHash -salt');
   }
 ));
 

@@ -9,6 +9,7 @@ import * as passport from 'passport';
 import * as session from 'express-session';
 const MongoStore = require('connect-mongo')(session);
 import routes from './routes/index';
+import User from './models/User';
 
 //create the app
 let app = express();
@@ -50,8 +51,19 @@ app.use(session({
 //connect to DB
 let dbc = mongoose.connect(process.env.MONGO_URI);
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+mongoose.connection.on('connected', () => {
+  User.findOne({username: 'admin'}, (err, user) => {
+    if(err) return;
+    if(user) return;
+    if(!user)
+      var admin = new User();
+      admin.email = process.env.ADMIN_EMAIL;
+      admin.username = process.env.ADMIN_USERNAME;
+      admin.setPassword(process.env.ADMIN_PASSWORD);
+      admin.roles = ['user', 'admin'];
+      admin.save();
+  });
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

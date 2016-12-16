@@ -7,11 +7,10 @@ export interface IUser extends mongoose.Document {
   email: { type: String, unique: true, lowercase: true },
   passwordHash: String,
   salt: String,
-  id: String,
   setPassword(password: string): boolean,
   validatePassword(password: string): boolean,
   generateJWT(): JsonWebKey,
-  token: JsonWebKey
+  roles: Array<String>
 }
 
 let UserSchema = new mongoose.Schema({
@@ -19,11 +18,7 @@ let UserSchema = new mongoose.Schema({
   email: { type: String, unique: true, lowercase: true },
   passwordHash: String,
   salt: String,
-  id: { type: String, getter: function(val) { return this._id.toString(); }, unique: true },
-  token: String
-},
-{
-  id: false //non virtual
+  roles: {type: Array, default: ['user']}
 });
 
 UserSchema.method('setPassword', function(password) {
@@ -43,11 +38,6 @@ UserSchema.method('generateJWT', function() {
     username: this.username,
     email: this.email
   }, process.env.JWT_SECRET, {expiresIn: '2 days'});
-});
-
-UserSchema.pre('save', function(next) {
-    this.id = this._id;
-    next();
 });
 
 export default mongoose.model<IUser>("User", UserSchema);

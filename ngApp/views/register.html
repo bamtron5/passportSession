@@ -1,12 +1,12 @@
 <h1>Register</h1>
-<form ng-submit="controller.register(controller.user)">
+<form ng-submit="vm.register(vm.user)">
   <label>User Name</label>
-  <input type="text" ng-model="controller.user.username">
+  <input type="text" ng-model="vm.user.username">
   <hr/>
   <label>Email</label>
-  <input type="email" ng-model="controller.user.email">
+  <input type="email" ng-model="vm.user.email">
   <hr/>
   <label>Password</label>
-  <input type="password" ng-model="controller.user.password">
+  <input type="password" ng-model="vm.user.password">
   <button type="submit">Submit</button>
 </form>

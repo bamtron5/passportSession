@@ -17,13 +17,8 @@ namespace passportDemo {
           templateUrl: '/ngApp/views/main.html',
           controller: passportDemo.Controllers.MainController,
           controllerAs: 'vm',
-          //TODO
-          // //get the state by name and change the value of custom data property
-          // $state.get('contacts').data.customData1= 100;
-          //  // then you can go to that state.
-          // $state.go('contacts');
           data: {
-            currentUser: new Promise(() => {}) //set by MainController to state.current.data.currentUser
+            currentUser: new Promise(() => {}) //RESOLVED by MainController to state.current.data.currentUser
           }
         })
         .state('main.home', {
@@ -31,19 +26,19 @@ namespace passportDemo {
           parent: 'main',
           templateUrl: '/ngApp/views/home.html',
           controller: passportDemo.Controllers.HomeController,
-          controllerAs: 'controller'
+          controllerAs: 'vm'
         })
         .state('main.register', {
           url: '/register',
           templateUrl: '/ngApp/views/register.html',
           controller: passportDemo.Controllers.UserController,
-          controllerAs: 'controller'
+          controllerAs: 'vm'
         })
         .state('main.login', {
           url: '/login',
           templateUrl: '/ngApp/views/login.html',
           controller: passportDemo.Controllers.UserController,
-          controllerAs: 'controller'
+          controllerAs: 'vm'
         })
         .state('notFound', {
           url: '/notFound',
@@ -88,7 +83,6 @@ namespace passportDemo {
         }
       }
     }])
-
     .run([
       '$rootScope', '$location',
       function($rootScope, $location) {

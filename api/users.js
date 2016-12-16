@@ -5,17 +5,19 @@ var User_1 = require("../models/User");
 var router = express.Router();
 router.get('/users/:id', function (req, res, next) {
     User_1.default.findOne(req.params._id).select('-passwordHash -salt').then(function (user) {
-        return res.status(200).send({ "user": user });
+        return res.status(200).json(user);
     }).catch(function (err) {
-        return res.status(404).send({ err: 'User not found.' });
+        return res.status(404).json({ err: 'User not found.' });
     });
 });
-router.get('/currentuser', passport.authenticate('bearer'), function (req, res, next) {
-    User_1.default.findOne({ _id: req.user._id }).select('-passwordHash -salt').then(function (user) {
-        return res.send(user);
-    }).catch(function (err) {
-        return res.status(100).send({ "message": "Unauthorized", err: err });
-    });
+router.get('/currentuser', function (req, res, next) {
+    passport.authenticate('bearer', function (err, user) {
+        if (err)
+            return next(err);
+        if (!user)
+            return res.status(200).json({});
+        return res.status(200).json(user);
+    })(req, res, next);
 });
 router.post('/Register', function (req, res, next) {
     var user = new User_1.default();
@@ -25,40 +27,28 @@ router.post('/Register', function (req, res, next) {
     user.save(function (err, user) {
         if (err)
             return next(err);
-        console.log('-==new User==-');
-        console.log(user.username);
-        res.status(200).send({ message: "Registration complete." });
+        res.status(200).json({ message: "Registration complete." });
     });
 });
 router.post('/Login/Local', function (req, res, next) {
     if (!req.body.username || !req.body.password) {
-        console.log(req.body);
-        return res.status(400).send("Please fill out every field");
+        return res.status(400).json({ message: "Please fill out every field" });
     }
     passport.authenticate('local', function (err, user, info) {
-        console.log('--= Passport Auth =--');
         if (err)
             return next(err);
         if (user) {
             var token = user.generateJWT();
-            req.session.regenerate(function (err) {
-                console.log('testing for unexp server cookie');
-            });
-            req.session.save(function (err) {
-                console.log('session saved');
-                console.log('session err:', err);
-            });
-            console.log('token granted for: ', user.username);
             return res.json({ token: token });
         }
-        return res.status(400).send(info);
+        return res.status(400).json(info);
     })(req, res, next);
 });
 router.get('/Logout/Local', function (req, res, next) {
     req.logout();
     req.session.destroy(function (err) {
         if (err)
-            return res.status(500).send({ message: 'still authenticated, please try again.' });
+            return res.status(500).json({ message: 'still authenticated, please try again.' });
         req.user = null;
         return res.redirect('/');
     });

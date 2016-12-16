@@ -1,3 +1,19 @@
 <h1>HOME</h1>
 
-{{controller.currentUser}}
+<pre ng-if="vm.currentUser.username">
+  {{vm.currentUser | json:2}}
+</pre>
+
+<div ng-if="vm.currentUser.roles.indexOf('admin') > -1">
+  <h2>Welcome to this exclusive admin photo page for admins only</h2>
+  <img src="/ngApp/public/images/guaranteeit.jpg" alt="adminonlyimage">
+</div>
+
+<div ng-if="vm.currentUser.roles.indexOf('user') > -1">
+  <h2>Welcome to this user only page for generic users</h2>
+  <img src="/ngApp/public/images/Donald_Duck.svg.png" alt="usersimage">
+</div>
+
+<div ng-if="vm.currentUser.roles.indexOf('user' || 'admin') > -1">
+  ALL ROLES CAN SEE THIS MESSAGE
+</div>

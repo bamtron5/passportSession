@@ -14,16 +14,16 @@ var passportDemo;
                 this.UserService.getCurrentUser().then(function (user) {
                     _this.currentUser = user;
                     $state.current.data.currentUser.resolve(user);
-                }).catch(function (user) {
-                    _this.currentUser = user;
-                    $state.current.data.currentUser.reject({});
+                }).catch(function () {
+                    _this.currentUser = false;
+                    $state.current.data.currentUser.reject(false);
                 });
             }
             MainController.prototype.logout = function () {
                 var _this = this;
                 this.UserService.logout().then(function () {
                     _this.$cookies.remove('token');
-                    _this.$state.transitionTo('main.home', null, { reload: true, notify: true });
+                    _this.$state.go('main.home', null, { reload: true, notify: true });
                 }).catch(function () {
                     throw new Error('Unsuccessful logout');
                 });
@@ -56,7 +56,7 @@ var passportDemo;
                 var _this = this;
                 this.UserService.login(user).then(function (res) {
                     _this.$cookies.put('token', res.token);
-                    _this.$state.transitionTo('main.home', null, { reload: true, notify: true });
+                    _this.$state.go('main.home', null, { reload: true, notify: true });
                 }).catch(function (err) {
                     alert('Bunk login, please try again.');
                 });
@@ -66,17 +66,7 @@ var passportDemo;
                 this.UserService.register(user).then(function (res) {
                     _this.$state.go('main.login');
                 }).catch(function (err) {
-                    console.log(err);
                     alert('Registration error: please try again.');
-                });
-            };
-            UserController.prototype.logout = function () {
-                var _this = this;
-                this.UserService.logout().then(function (res) {
-                    _this.$cookies.remove('token');
-                    _this.$state.transitionTo('main.home', null, { reload: true, notify: true });
-                }).catch(function (err) {
-                    console.log(err);
                 });
             };
             return UserController;

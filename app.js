@@ -8,6 +8,7 @@ var passport = require("passport");
 var session = require("express-session");
 var MongoStore = require('connect-mongo')(session);
 var index_1 = require("./routes/index");
+var User_1 = require("./models/User");
 var app = express();
 if (app.get('env') === 'development') {
     var dotenv = require('dotenv');
@@ -34,6 +35,21 @@ app.use(session({
     saveUninitialized: false
 }));
 var dbc = mongoose.connect(process.env.MONGO_URI);
+mongoose.connection.on('connected', function () {
+    User_1.default.findOne({ username: 'admin' }, function (err, user) {
+        if (err)
+            return;
+        if (user)
+            return;
+        if (!user)
+            var admin = new User_1.default();
+        admin.email = process.env.ADMIN_EMAIL;
+        admin.username = process.env.ADMIN_USERNAME;
+        admin.setPassword(process.env.ADMIN_PASSWORD);
+        admin.roles = ['user', 'admin'];
+        admin.save();
+    });
+});
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(logger('dev'));

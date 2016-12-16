@@ -3,14 +3,13 @@
   <div>
     <a href="/">Home</a>
     <a href="/about">About</a>
-    <a ng-if="!vm.currentUser.user" href="/login">Login</a>
-    <a ng-if="!vm.currentUser.user" href="/register">Register</a>
-    <button ng-click="vm.logout()">Logout</button>
+    <a ng-if="!vm.currentUser.username" href="/login">Login</a>
+    <a ng-if="!vm.currentUser.username" href="/register">Register</a>
+    <button ng-if="vm.currentUser.username" ng-click="vm.logout()">Logout</button>
   </div>
   <hr />
-  <div ng-if="vm.currentUser.user.username">
-    <pre>{{vm.currentUser | json:4}}</pre>
-    <h3>Current user: {{vm.currentUser.user.username}}</h3>
+  <div ng-if="vm.currentUser.username">
+    <h3>Current user: {{vm.currentUser.username}}</h3>
   </div>
 </div>
 <ui-view></ui-view>
