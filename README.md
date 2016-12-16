@@ -537,7 +537,7 @@ namespace passportDemo.Controllers {
 Please inspect my commits for the files.  If you're having issues please contact me.
 
 ## Testing
-*Login with username: `admin` and password `admin`*
+*Login with username: `admin` and password `password`*
 
 Then check your db to see the session table
 Check your application tab in your dev tools for the cookies `cid` and `token`
