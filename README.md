@@ -550,8 +550,6 @@ Logout and maksure the session table has removed the record
 `router.get('/stuff', passport.authenticate('bearer'), function(req, res, next){})`
 this would return 401 if unauthenticated
 
-![](https://media.giphy.com/media/xT9DPQvQ4wuYAbCRtC/giphy.gif "")
-
 * TODO
   * API should check user roles
   * Support for localStorage
