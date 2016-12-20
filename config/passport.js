@@ -15,7 +15,7 @@ passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
     callbackURL: process.env.ROOT_URL + "/auth/facebook/callback",
-    profileFields: ['id', 'displayName', 'photos', 'email']
+    profileFields: ['id', 'displayName', 'photos']
 }, function (accessToken, refreshToken, profile, done) {
     User_1.default.findOne({ facebookId: profile.id }, function (err, user) {
         if (user) {
@@ -23,11 +23,10 @@ passport.use(new FacebookStrategy({
         }
         else {
             var u_1 = new User_1.default();
-            u_1.username = profile.name.displayName;
+            u_1.username = profile.displayName;
             u_1.facebookId = profile.id;
-            u_1.facebook.name = profile.name.displayName;
+            u_1.facebook.name = profile.displayName;
             u_1.facebook.token = accessToken;
-            u_1.facebook.email = profile.email;
             u_1.save(function (err) {
                 if (err)
                     throw err;

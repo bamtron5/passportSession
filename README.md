@@ -276,7 +276,7 @@ router.post('/Register', function(req, res, next) {
   });
 });
 
-router.post('/Login/Local', function(req, res, next) {
+router.post('/login/local', function(req, res, next) {
   if(!req.body.username || !req.body.password){
     return res.status(400).json({message: "Please fill out every field"});
   }
@@ -298,7 +298,7 @@ router.post('/Login/Local', function(req, res, next) {
   })(req, res, next);
 });
 
-router.get('/Logout/Local', function(req, res, next) {
+router.get('/logout/local', function(req, res, next) {
   req.logout();
 
   req.session.destroy((err) => {

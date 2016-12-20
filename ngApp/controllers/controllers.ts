@@ -64,15 +64,23 @@ namespace passportDemo.Controllers {
   }
 
   export class ProfileController {
-
+    public avatar:string;
+    public currentUser;
     constructor(
       currentUser: ng.ui.IResolvedState,
       $state: ng.ui.IStateService
     ) {
 
+      this.currentUser = currentUser;
       //u must b auth br0 *redirected w/ angular*
       if(!currentUser['username']) {
         $state.go('main.login', null, { reload: true, notify: true });
+      }
+
+      if(currentUser['facebookId']){
+        this.avatar = `//graph.facebook.com/v2.8/${currentUser['facebookId']}/picture`;
+      } else {
+        this.avatar = '//placehold.it/350x350';
       }
     }
   }

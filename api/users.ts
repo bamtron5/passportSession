@@ -3,6 +3,7 @@ import * as mongoose from 'mongoose';
 import * as passport from 'passport';
 import * as jwt from 'jsonwebtoken';
 import * as session from 'express-session';
+import methods from './methods';
 import User from '../models/User';
 let router = express.Router();
 
@@ -19,8 +20,6 @@ router.get('/currentuser', (req, res, next) => {
   passport.authenticate('bearer', function(err, user) {
     if (err) return next(err);
     if (!user) return res.status(200).json({});
-    console.log(req.isAuthenticated());
-
     return res.status(200).json(user);
   })(req, res, next);
 });
@@ -36,36 +35,18 @@ router.post('/Register', function(req, res, next) {
   });
 });
 
-router.post('/Login/Local', function(req, res, next) {
+router.post('/login/local', function(req, res, next) {
   if(!req.body.username || !req.body.password){
     return res.status(400).json({message: "Please fill out every field"});
   }
 
   passport.authenticate('local', function(err, user, info) {
     if(err) return next(err);
-    if(user) {
-      let token = user.generateJWT();
-
-      return req.logIn(user, (err) => {
-        if (err) res.status(500).json({message: 'login failed'});
-        return req.session.save(function (err){
-          if (err) res.status(500).json({message: 'session failed'});
-          return res.json({ token: token, isAuthenticated: req.isAuthenticated()});
-        });
-      });
-    }
+    if(user) return methods.setSession(req, res, next, user);
     return res.status(400).json(info);
   })(req, res, next);
 });
 
-router.get('/Logout/Local', function(req, res, next) {
-  req.logout();
-
-  req.session.destroy((err) => {
-    if (err) return res.status(500).json({message: 'still authenticated, please try again.'});
-    req.user = null;
-    return res.json({isAuthenticated: req.isAuthenticated()});
-  });
-});
+router.get('/logout/local', methods.destroySession);
 
 export = router;

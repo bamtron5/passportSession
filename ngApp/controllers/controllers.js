@@ -59,8 +59,15 @@ var passportDemo;
         Controllers.UserController = UserController;
         var ProfileController = (function () {
             function ProfileController(currentUser, $state) {
+                this.currentUser = currentUser;
                 if (!currentUser['username']) {
                     $state.go('main.login', null, { reload: true, notify: true });
+                }
+                if (currentUser['facebookId']) {
+                    this.avatar = "//graph.facebook.com/v2.8/" + currentUser['facebookId'] + "/picture";
+                }
+                else {
+                    this.avatar = '//placehold.it/350x350';
                 }
             }
             return ProfileController;

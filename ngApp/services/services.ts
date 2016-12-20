@@ -29,8 +29,8 @@ namespace passportDemo.Services {
 
       constructor(private $resource: ng.resource.IResourceService) {
 
-        this.LogoutResource = $resource('/api/Logout/Local');
-        this.LoginResource = $resource('/api/Login/Local');
+        this.LogoutResource = $resource('/api/logout/local');
+        this.LoginResource = $resource('/api/login/local');
         this.RegisterResource = $resource('/api/Register');
         this.UserResource = $resource('/api/users/:id');
       }

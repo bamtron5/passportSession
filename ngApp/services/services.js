@@ -5,8 +5,8 @@ var passportDemo;
         var UserService = (function () {
             function UserService($resource) {
                 this.$resource = $resource;
-                this.LogoutResource = $resource('/api/Logout/Local');
-                this.LoginResource = $resource('/api/Login/Local');
+                this.LogoutResource = $resource('/api/logout/local');
+                this.LoginResource = $resource('/api/login/local');
                 this.RegisterResource = $resource('/api/Register');
                 this.UserResource = $resource('/api/users/:id');
             }
