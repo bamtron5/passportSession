@@ -1,5 +1,5 @@
 #Passport Local w/ Express-Session
-Passport is great for middle and configuration.  Express-Session will supply a cid cookie `connectionId`, a token cookie from jwt, and a mongo table that will track user sessions in your DB.  This gives your app persistance in the client and tracking in the DB if need be.  
+Passport is great for middleware functions and configuration.  Express-Session will supply a cid cookie `connectionId`, a token cookie from jwt, and a mongo table that will track user sessions in your DB.  This gives your app persistance in the client and tracking in the DB if need be.  
 
 ##Prereq
 * I assume you have a User model and a mongoose connection
@@ -39,6 +39,8 @@ ADMIN_EMAIL=admin@admin.com
 `bower i --save angular-cookies`
 
 Place this into your index.ejs file `<script src="/bower_components/angular-cookies/angular-cookies.min.js"></script>`
+
+Inject `ngCookies` into your app.
 
 ##Configure Passport
 
@@ -308,6 +310,7 @@ router.get('/Logout/Local', function(req, res, next) {
 
 export = router;
 ```
+*note:* Passport should login, then session should be saved in db.  Session is destroyed and passports logs out on logout.
 
 ## Angular App
 ```javascript
@@ -500,16 +503,16 @@ Please inspect my commits for the files.  If you're having issues please contact
 ## Testing
 *Login with username: `admin` and password `password`*
 
-Then check your db to see the session table
-Check your application tab in your dev tools for the cookies `cid` and `token`
-Logout and maksure the session table has removed the record
+* Then check your db to see the session table
+* Check your application tab in your dev tools for the cookies `cid` and `token`
+* Logout and maksure the session table has removed the record
 
 *Register a regular user*
 
-Login w/ this user
-Then check your db to see the session table
-Check your application tab in your dev tools for the cookies `cid` and `token`
-Logout and maksure the session table has removed the record
+* Login w/ this user
+* Then check your db to see the session table
+* Check your application tab in your dev tools for the cookies `cid` and `token`
+* Logout and maksure the session table has removed the record
 
 ## Middleware checks
 *sample*
