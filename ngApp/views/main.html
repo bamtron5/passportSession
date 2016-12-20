@@ -5,6 +5,7 @@
     <a href="/about">About</a>
     <a ng-if="!vm.currentUser.username" href="/login">Login</a>
     <a ng-if="!vm.currentUser.username" href="/register">Register</a>
+    <a href="/profile">Profile</a>
     <button ng-if="vm.currentUser.username" ng-click="vm.logout()">Logout</button>
   </div>
   <hr />

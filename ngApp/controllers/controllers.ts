@@ -7,17 +7,10 @@ namespace passportDemo.Controllers {
       private UserService: passportDemo.Services.UserService,
       private $state: ng.ui.IStateService,
       private $cookies: ng.cookies.ICookiesService,
-      private $q: ng.IQService
+      private $q: ng.IQService,
+      currentUser: ng.ui.IResolvedState
     ) {
-      $state.current.data.currentUser = $q.defer();
-
-      this.UserService.getCurrentUser().then((user) => {
-        this.currentUser = user;
-        $state.current.data.currentUser.resolve(user);
-      }).catch(() => {
-        this.currentUser = false;
-        $state.current.data.currentUser.reject(false);
-      });
+      this.currentUser = currentUser;
     }
 
     logout() {
@@ -33,13 +26,10 @@ namespace passportDemo.Controllers {
   export class HomeController {
     public currentUser;
     constructor(
-      private $state: ng.ui.IStateService
+      private $state: ng.ui.IStateService,
+      currentUser: ng.ui.IResolvedState
     ) {
-      $state.current.data.currentUser.promise.then((user) => {
-        this.currentUser = user;
-      }).catch((user) => {
-        this.currentUser = user;
-      });
+      this.currentUser = currentUser;
     }
   }
 
@@ -70,6 +60,20 @@ namespace passportDemo.Controllers {
       private $state: ng.ui.IStateService,
       private $cookies: ng.cookies.ICookiesService
     ) {
+    }
+  }
+
+  export class ProfileController {
+
+    constructor(
+      currentUser: ng.ui.IResolvedState,
+      $state: ng.ui.IStateService
+    ) {
+
+      //u must b auth br0 *redirected w/ angular*
+      if(!currentUser['username']) {
+        $state.go('main.login', null, { reload: true, notify: true });
+      }
     }
   }
 }

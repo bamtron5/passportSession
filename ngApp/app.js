@@ -9,8 +9,16 @@ var passportDemo;
             templateUrl: '/ngApp/views/main.html',
             controller: passportDemo.Controllers.MainController,
             controllerAs: 'vm',
-            data: {
-                currentUser: new Promise(function () { })
+            resolve: {
+                currentUser: [
+                    'UserService', '$state', function (UserService, $state) {
+                        return UserService.getCurrentUser(function (user) {
+                            return user;
+                        }).catch(function (e) {
+                            return { username: false };
+                        });
+                    }
+                ]
             }
         })
             .state('main.home', {
@@ -30,6 +38,12 @@ var passportDemo;
             url: '/login',
             templateUrl: '/ngApp/views/login.html',
             controller: passportDemo.Controllers.UserController,
+            controllerAs: 'vm'
+        })
+            .state('main.profile', {
+            url: '/profile',
+            templateUrl: '/ngApp/views/profile.html',
+            controller: passportDemo.Controllers.ProfileController,
             controllerAs: 'vm'
         })
             .state('notFound', {
@@ -64,8 +78,8 @@ var passportDemo;
             };
         }])
         .run([
-        '$rootScope', '$location',
-        function ($rootScope, $location) {
+        '$rootScope', '$location', 'UserService', '$state', '$q',
+        function ($rootScope, $location, UserService, $state, $q) {
             $rootScope.$on('$stateChangeStart', function (event, next) {
             });
         }

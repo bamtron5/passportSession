@@ -9,8 +9,5 @@ router.get('/login/facebook', passport.authenticate('facebook'));
 router.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login' }), function (req, res) {
     res.redirect('/');
 });
-router.get('/profile', require('connect-ensure-login').ensureLoggedIn(), function (req, res) {
-    res.render('profile', { user: req.user });
-});
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = router;

@@ -1,5 +1,4 @@
 namespace passportDemo {
-  //TODO components
   angular.module('passportDemo', ['ui.router', 'ngResource', 'ngCookies'])
     .config((
       $resourceProvider: ng.resource.IResourceServiceProvider,
@@ -17,8 +16,15 @@ namespace passportDemo {
           templateUrl: '/ngApp/views/main.html',
           controller: passportDemo.Controllers.MainController,
           controllerAs: 'vm',
-          data: {
-            currentUser: new Promise(() => {}) //RESOLVED by MainController to state.current.data.currentUser
+          resolve: {
+            currentUser: [
+              'UserService', '$state', (UserService, $state) => {
+                return UserService.getCurrentUser((user) => {
+                  return user;
+                }).catch((e) => {
+                  return { username: false };
+                });
+              }]
           }
         })
         .state('main.home', {
@@ -40,10 +46,17 @@ namespace passportDemo {
           controller: passportDemo.Controllers.UserController,
           controllerAs: 'vm'
         })
+        .state('main.profile', {
+          url: '/profile',
+          templateUrl: '/ngApp/views/profile.html',
+          controller: passportDemo.Controllers.ProfileController,
+          controllerAs: 'vm'
+        })
         .state('notFound', {
           url: '/notFound',
           templateUrl: '/ngApp/views/notFound.html'
         });
+
 
       // Handle request for non-existent route
       $urlRouterProvider.otherwise('/notFound');
@@ -84,8 +97,8 @@ namespace passportDemo {
       }
     }])
     .run([
-      '$rootScope', '$location',
-      function($rootScope, $location) {
+      '$rootScope', '$location', 'UserService', '$state', '$q',
+      function($rootScope, $location, UserService, $state, $q) {
       // Redirect to login if route requires auth and you're not logged in
       $rootScope.$on('$stateChangeStart', function (event, next) {
         // console.log(`GOING TO: ${next.url}`);

@@ -3,21 +3,13 @@ var passportDemo;
     var Controllers;
     (function (Controllers) {
         var MainController = (function () {
-            function MainController(UserService, $state, $cookies, $q) {
-                var _this = this;
+            function MainController(UserService, $state, $cookies, $q, currentUser) {
                 this.UserService = UserService;
                 this.$state = $state;
                 this.$cookies = $cookies;
                 this.$q = $q;
                 this.self = this;
-                $state.current.data.currentUser = $q.defer();
-                this.UserService.getCurrentUser().then(function (user) {
-                    _this.currentUser = user;
-                    $state.current.data.currentUser.resolve(user);
-                }).catch(function () {
-                    _this.currentUser = false;
-                    $state.current.data.currentUser.reject(false);
-                });
+                this.currentUser = currentUser;
             }
             MainController.prototype.logout = function () {
                 var _this = this;
@@ -32,14 +24,9 @@ var passportDemo;
         }());
         Controllers.MainController = MainController;
         var HomeController = (function () {
-            function HomeController($state) {
-                var _this = this;
+            function HomeController($state, currentUser) {
                 this.$state = $state;
-                $state.current.data.currentUser.promise.then(function (user) {
-                    _this.currentUser = user;
-                }).catch(function (user) {
-                    _this.currentUser = user;
-                });
+                this.currentUser = currentUser;
             }
             return HomeController;
         }());
@@ -70,5 +57,14 @@ var passportDemo;
             return UserController;
         }());
         Controllers.UserController = UserController;
+        var ProfileController = (function () {
+            function ProfileController(currentUser, $state) {
+                if (!currentUser['username']) {
+                    $state.go('main.login', null, { reload: true, notify: true });
+                }
+            }
+            return ProfileController;
+        }());
+        Controllers.ProfileController = ProfileController;
     })(Controllers = passportDemo.Controllers || (passportDemo.Controllers = {}));
 })(passportDemo || (passportDemo = {}));

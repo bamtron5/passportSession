@@ -16,10 +16,4 @@ router.get('/auth/facebook/callback',
     res.redirect('/');
   });
 
-router.get('/profile',
-  require('connect-ensure-login').ensureLoggedIn(),
-  function(req, res){
-    res.render('profile', { user: req.user });
-  });
-
 export default router;
