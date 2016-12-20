@@ -80,12 +80,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bower_components', express.static(path.join(__dirname, 'bower_components')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 app.use('/ngApp', express.static(path.join(__dirname, 'ngApp')));
-app.use('/api', express.static(path.join(__dirname, 'api')));
+
+//mount api
+app.use('/api', require('./api/users'));
 
 //routes
 app.use('/', routes);
-
-app.use('/api', require('./api/users'));
 
 // redirect 404 to home for the sake of AngularJS client-side routes
 app.get('/*', function(req, res, next) {

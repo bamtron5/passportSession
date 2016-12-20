@@ -2,6 +2,7 @@ import * as passport from 'passport';
 import * as mongoose from 'mongoose';
 let LocalStrategy = require('passport-local').Strategy;
 let BearerStrategy = require('passport-http-bearer').Strategy;
+let FacebookStrategy = require('passport-facebook').Strategy;
 import User from '../models/User';
 import * as jwt from 'jsonwebtoken';
 
@@ -14,6 +15,32 @@ passport.deserializeUser(function(obj, done) {
   // console.log('deserializeUser', obj);
   done(null, obj);
 });
+
+passport.use(new FacebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
+    callbackURL: process.env.ROOT_URL + "/auth/facebook/callback",
+    profileFields: ['id', 'displayName', 'photos', 'email']
+  },
+  function(accessToken, refreshToken, profile, done) {
+    User.findOne({ facebookId: profile.id }, function (err, user) {
+      if (user) {
+        return done(err, user);
+      } else {
+        let u = new User();
+        u.username = profile.name.displayName;
+        u.facebookId = profile.id;
+        u.facebook.name = profile.name.displayName;
+        u.facebook.token = accessToken;
+        u.facebook.email = profile.email;
+        u.save((err) => {
+          if (err) throw err;
+          return done(null, u);
+        });
+      }
+    });
+  }
+));
 
 passport.use(new BearerStrategy(
   function(token, done) {
