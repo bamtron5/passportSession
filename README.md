@@ -114,7 +114,7 @@ Here is what the main server file should resemble.  Please read my comments and 
 * `import * as session from 'express-session';`
 * `const MongoStore = require('connect-mongo')(session);`
 
-**create:** `./app.ts`
+**create: `./app.ts`**
 
 ```javascript
 import * as express from 'express';
