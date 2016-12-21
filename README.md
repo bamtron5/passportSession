@@ -18,17 +18,26 @@ if (app.get('env') === 'development') {
 If you don't have NVM (Node Version Manager) please install it
 [NVM Docs on .nvmrc](https://github.com/creationix/nvm#nvmrc)
 
+**register**
+[Facebook app registration](https://developers.facebook.com/apps/)
+
+* Name your app
+* whitelist your domain `http://localhost:3000`
+
 **create** `.nvmrc` and add `lts/*`.  Which stands for latest.
 
 **create** `.env`
 
 ```
+ROOT_URL=http:/localhost:3000
 MONGO_URI=mongodb://localhost:27017/passport-demo
 JWT_SECRET=SecretKey
 SESSION_SECRET=SecretKey
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=password
 ADMIN_EMAIL=admin@admin.com
+FACEBOOK_APP_ID=yourFacebookAppId
+FACEBOOK_APP_SECRET=yourFacebookSecret
 ```
 
 ##Installation and Types
