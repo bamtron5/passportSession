@@ -32,7 +32,7 @@ ADMIN_EMAIL=admin@admin.com
 ```
 
 ##Installation and Types
-`npm i --save connect-mongo express-session passport passport-http-bearer passport-local jsonwebtoken crypto passport-facebook`
+`npm i --save connect-mongo express-session passport  passport-local jsonwebtoken crypto passport-facebook`
 
 `npm i --save @types/connect-mongo @types/express-session @types/passport  @types/passport-local @types/jsonwebtoken @types/crypto @types/passport-facebook`
 
