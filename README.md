@@ -214,6 +214,9 @@ app.use('/', routes);
 *note:* `sess.secure` will set our secure flag on https servers for deployment.
 
 ## User Model
+
+**create `./models/Users.ts`**
+
 ```javascript
 import * as mongoose from 'mongoose';
 import * as crypto from 'crypto';
@@ -321,7 +324,8 @@ export default methods;
 
 ## Users API
 
-**create:** `./api/users.ts`
+**create: `./api/users.ts`**
+
 ```javascript
 import express = require('express');
 import * as mongoose from 'mongoose';
