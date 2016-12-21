@@ -24,8 +24,7 @@
     public currentUser;
     constructor(
       private $state: ng.ui.IStateService,
-      currentUser: ng.ui.IResolvedState,
-      private $cookies: ng.cookies.ICookiesService
+      currentUser: ng.ui.IResolvedState
     ) {
 
       this.currentUser = currentUser;

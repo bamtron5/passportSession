@@ -21,9 +21,8 @@ var passportDemo;
         }());
         Controllers.MainController = MainController;
         var HomeController = (function () {
-            function HomeController($state, currentUser, $cookies) {
+            function HomeController($state, currentUser) {
                 this.$state = $state;
-                this.$cookies = $cookies;
                 this.currentUser = currentUser;
             }
             return HomeController;
