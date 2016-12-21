@@ -314,63 +314,56 @@ export default methods;
 
 **create:** `./api/users.ts`
 ```javascript
+import express = require('express');
 import * as mongoose from 'mongoose';
-import * as crypto from 'crypto';
+import * as passport from 'passport';
 import * as jwt from 'jsonwebtoken';
+import * as session from 'express-session';
+import methods from './methods';
+import User from '../models/User';
+let router = express.Router();
 
-export interface IFacebook {
-  token: string,
-  name: string,
-  email: string
-}
-
-export interface IUser extends mongoose.Document {
-  username: { type: String, lowercase: true, unique: true},
-  email: { type: String, unique: true, lowercase: true },
-  passwordHash: String,
-  salt: String,
-  facebookId: String,
-  facebook: IFacebook,
-  setPassword(password: string): boolean,
-  validatePassword(password: string): boolean,
-  generateJWT(): JsonWebKey,
-  roles: Array<String>
-}
-
-let UserSchema = new mongoose.Schema({
-  username: { type: String, lowercase: true, unique: true},
-  email: { type: String, unique: true, lowercase: true },
-  passwordHash: String,
-  salt: String,
-  facebookId: String,
-  facebook: {
-    token: String,
-    name: String,
-    email: String
-  },
-  roles: {type: Array, default: ['user']}
+router.get('/users/:id', function(req, res, next) {
+  User.findOne(req.params._id).select('-passwordHash -salt').then((user) => {
+    return res.status(200).json(user);
+  }).catch((err) => {
+    return res.status(404).json({err: 'User not found.'})
+  });
 });
 
-UserSchema.method('setPassword', function(password) {
-  this.salt = crypto.randomBytes(16).toString('hex');
-  this.passwordHash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
+//CONSTANTLY RETURNS 200 because we are always authorized to check.
+router.get('/currentuser', (req, res, next) => {
+  if (!req.user) return res.json({});
+  return res.json(req.user);
 });
 
-UserSchema.method('validatePassword', function(password) {
-  let hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
-  return (hash === this.passwordHash);
+router.post('/Register', function(req, res, next) {
+  let user = new User();
+  user.username = req.body.username;
+  user.email = req.body.email;
+  user.setPassword(req.body.password);
+  user.save(function(err, user) {
+    if(err) return next(err);
+    res.status(200).json({message: "Registration complete."});
+  });
 });
 
-UserSchema.method('generateJWT', function() {
-  return jwt.sign({
-    id: this._id.toString(),
-    _id: this._id,
-    username: this.username,
-    email: this.email
-  }, process.env.JWT_SECRET, {expiresIn: '2 days'});
+router.post('/login/local', function(req, res, next) {
+  if(!req.body.username || !req.body.password){
+    return res.status(400).json({message: "Please fill out every field"});
+  }
+
+  passport.authenticate('local', function(err, user, info) {
+    if(err) return next(err);
+    if(user) return methods.setSession(req, res, next, user);
+    return res.status(400).json(info);
+  })(req, res, next);
 });
 
-export default mongoose.model<IUser>("User", UserSchema);
+router.get('/logout/local', methods.destroySession);
+
+export = router;
+
 ```
 *note:* Passport should login, then session should be saved in db.  Session is destroyed and passports logs out on logout.
 
