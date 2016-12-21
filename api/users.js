@@ -12,13 +12,9 @@ router.get('/users/:id', function (req, res, next) {
     });
 });
 router.get('/currentuser', function (req, res, next) {
-    passport.authenticate('bearer', function (err, user) {
-        if (err)
-            return next(err);
-        if (!user)
-            return res.status(200).json({});
-        return res.status(200).json(user);
-    })(req, res, next);
+    if (!req.user)
+        return res.json({});
+    return res.json(req.user);
 });
 router.post('/Register', function (req, res, next) {
     var user = new User_1.default();

@@ -8,7 +8,6 @@ namespace passportDemo {
       $httpProvider: ng.IHttpProvider
     ) => {
       // Define routes
-      //
       $stateProvider
         .state('main', {
           url: '',
@@ -55,14 +54,23 @@ namespace passportDemo {
         .state('notFound', {
           url: '/notFound',
           templateUrl: '/ngApp/views/notFound.html'
+        })
+        .state('main.authsuccess', {
+          url: '/authsuccess',
+          templateUrl: '/ngApp/views/authsuccess.html',
+          controller: passportDemo.Controllers.ProfileController,
+          controllerAs: 'vm'
         });
-
 
       // Handle request for non-existent route
       $urlRouterProvider.otherwise('/notFound');
 
       // Enable HTML5 navigation
-      $locationProvider.html5Mode(true);
+      $locationProvider.html5Mode({
+        enabled: true,
+        requireBase: false,
+        rewriteLinks: false
+      });
 
       //for authInterceptor factory
       $httpProvider.interceptors.push('authInterceptor');

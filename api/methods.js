@@ -9,7 +9,7 @@ function setSession(req, res, next, user) {
         return req.session.save(function (err) {
             if (err)
                 res.sendStatus(500).json({ message: 'session failed' });
-            return res.json({ token: token, isAuthenticated: req.isAuthenticated() });
+            return res.redirect('/profile');
         });
     });
 }

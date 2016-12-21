@@ -3,18 +3,15 @@ var passportDemo;
     var Controllers;
     (function (Controllers) {
         var MainController = (function () {
-            function MainController(UserService, $state, $cookies, $q, currentUser) {
+            function MainController(UserService, $state, currentUser) {
                 this.UserService = UserService;
                 this.$state = $state;
-                this.$cookies = $cookies;
-                this.$q = $q;
                 this.self = this;
                 this.currentUser = currentUser;
             }
             MainController.prototype.logout = function () {
                 var _this = this;
                 this.UserService.logout().then(function () {
-                    _this.$cookies.remove('token');
                     _this.$state.go('main.home', null, { reload: true, notify: true });
                 }).catch(function () {
                     throw new Error('Unsuccessful logout');
@@ -24,24 +21,23 @@ var passportDemo;
         }());
         Controllers.MainController = MainController;
         var HomeController = (function () {
-            function HomeController($state, currentUser) {
+            function HomeController($state, currentUser, $cookies) {
                 this.$state = $state;
+                this.$cookies = $cookies;
                 this.currentUser = currentUser;
             }
             return HomeController;
         }());
         Controllers.HomeController = HomeController;
         var UserController = (function () {
-            function UserController(UserService, $state, $cookies) {
+            function UserController(UserService, $state) {
                 this.UserService = UserService;
                 this.$state = $state;
-                this.$cookies = $cookies;
             }
             UserController.prototype.login = function (user) {
                 var _this = this;
                 this.UserService.login(user).then(function (res) {
-                    _this.$cookies.put('token', res.token);
-                    _this.$state.go('main.home', null, { reload: true, notify: true });
+                    _this.$state.go('main.profile', null, { reload: true, notify: true });
                 }).catch(function (err) {
                     alert('Bunk login, please try again.');
                 });

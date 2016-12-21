@@ -1,4 +1,4 @@
-namespace passportDemo.Controllers {
+  namespace passportDemo.Controllers {
   export class MainController {
     public currentUser;
     public self = this;
@@ -6,8 +6,6 @@ namespace passportDemo.Controllers {
     constructor(
       private UserService: passportDemo.Services.UserService,
       private $state: ng.ui.IStateService,
-      private $cookies: ng.cookies.ICookiesService,
-      private $q: ng.IQService,
       currentUser: ng.ui.IResolvedState
     ) {
       this.currentUser = currentUser;
@@ -15,7 +13,6 @@ namespace passportDemo.Controllers {
 
     logout() {
       this.UserService.logout().then(() => {
-        this.$cookies.remove('token');
         this.$state.go('main.home', null, {reload: true, notify:true});
       }).catch(() => {
         throw new Error('Unsuccessful logout');
@@ -27,8 +24,10 @@ namespace passportDemo.Controllers {
     public currentUser;
     constructor(
       private $state: ng.ui.IStateService,
-      currentUser: ng.ui.IResolvedState
+      currentUser: ng.ui.IResolvedState,
+      private $cookies: ng.cookies.ICookiesService
     ) {
+
       this.currentUser = currentUser;
     }
   }
@@ -40,8 +39,7 @@ namespace passportDemo.Controllers {
 
     public login(user) {
       this.UserService.login(user).then((res) => {
-        this.$cookies.put('token', res.token);
-        this.$state.go('main.home', null, {reload: true, notify:true});
+        this.$state.go('main.profile', null, {reload: true, notify:true});
       }).catch((err) => {
         alert('Bunk login, please try again.');
       });
@@ -57,8 +55,7 @@ namespace passportDemo.Controllers {
 
     constructor(
       private UserService:passportDemo.Services.UserService,
-      private $state: ng.ui.IStateService,
-      private $cookies: ng.cookies.ICookiesService
+      private $state: ng.ui.IStateService
     ) {
     }
   }
@@ -73,6 +70,7 @@ namespace passportDemo.Controllers {
 
       this.currentUser = currentUser;
       //u must b auth br0 *redirected w/ angular*
+      //should be done from stateProvider
       if(!currentUser['username']) {
         $state.go('main.login', null, { reload: true, notify: true });
       }

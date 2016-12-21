@@ -17,11 +17,8 @@ router.get('/users/:id', function(req, res, next) {
 
 //CONSTANTLY RETURNS 200 because we are always authorized to check.
 router.get('/currentuser', (req, res, next) => {
-  passport.authenticate('bearer', function(err, user) {
-    if (err) return next(err);
-    if (!user) return res.status(200).json({});
-    return res.status(200).json(user);
-  })(req, res, next);
+  if (!req.user) return res.json({});
+  return res.json(req.user);
 });
 
 router.post('/Register', function(req, res, next) {

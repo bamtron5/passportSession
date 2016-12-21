@@ -73,6 +73,7 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(passport.initialize());
+app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 //pathing
@@ -95,7 +96,6 @@ app.get('/*', function(req, res, next) {
     return res.render('index');
   }
 });
-
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

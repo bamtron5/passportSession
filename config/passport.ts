@@ -1,7 +1,6 @@
 import * as passport from 'passport';
 import * as mongoose from 'mongoose';
 let LocalStrategy = require('passport-local').Strategy;
-let BearerStrategy = require('passport-http-bearer').Strategy;
 let FacebookStrategy = require('passport-facebook').Strategy;
 import User from '../models/User';
 import * as jwt from 'jsonwebtoken';
@@ -20,7 +19,8 @@ passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
     callbackURL: process.env.ROOT_URL + "/auth/facebook/callback",
-    profileFields: ['id', 'displayName', 'photos']
+    profileFields: ['id', 'displayName', 'photos'],
+    display: 'popup'
   },
   function(accessToken, refreshToken, profile, done) {
     User.findOne({ facebookId: profile.id }, function (err, user) {
@@ -38,17 +38,6 @@ passport.use(new FacebookStrategy({
         });
       }
     });
-  }
-));
-
-passport.use(new BearerStrategy(
-  function(token, done) {
-    let user = jwt.verify(token, process.env.JWT_SECRET);
-    User.findOne({ username: user.username }, function (err, user) {
-      if (err) { return done(err); }
-      if (!user) { return done(null, false); }
-      return done(null, user);
-    }).select('-passwordHash -salt');
   }
 ));
 
