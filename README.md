@@ -34,7 +34,7 @@ ADMIN_EMAIL=admin@admin.com
 ##Installation and Types
 `npm i --save connect-mongo express-session passport passport-http-bearer passport-local jsonwebtoken crypto passport-facebook`
 
-`npm i --save @types/connect-mongo @types/express-session @types/passport @types/passport-http-bearer @types/passport-local @types/jsonwebtoken @types/crypto @types/passport-facebook`
+`npm i --save @types/connect-mongo @types/express-session @types/passport  @types/passport-local @types/jsonwebtoken @types/crypto @types/passport-facebook`
 
 ##Configure Passport
 
@@ -95,7 +95,7 @@ passport.use(new LocalStrategy(function(username: String, password: string, done
 
 ```
 
-*note:* Please note this line `.select('-passwordHash -salt');`.  This will prevent your `passport.authenticate('bearer')` (*token checks*) from returning a passwordHash and salt.  !!!
+*note:* Please note this line `.select('-passwordHash -salt');`.  This will prevent your `passport.authenticate` (*token checks*) from returning a passwordHash and salt.  !!!
 
 *note:* Passport is useful middle ware to check the token before routing.  During this time it will also set `req.user`.  The next call in the stack can be checked for the user by req.
 
