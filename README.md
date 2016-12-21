@@ -277,7 +277,7 @@ export default mongoose.model<IUser>("User", UserSchema);
 *note:* Methods are associated with the User model to assist the process of validating passwords, setting passwords hashes, and signing tokens.
 
 ## API Methods
-*create `./api/methods.ts`*
+**create `./api/methods.ts`**
 
 ```javascript
 import * as express from 'express';
@@ -376,9 +376,11 @@ export = router;
 ```
 *note:* Passport should login, then session should be saved in db.  Session is destroyed and passports logs out on logout.
 
-**create `./ngApp/app.ts`**
 
 ## Angular App
+
+**create `./ngApp/app.ts`**
+
 ```javascript
 namespace passportDemo {
   angular.module('passportDemo', ['ui.router', 'ngResource'])
@@ -495,6 +497,9 @@ namespace passportDemo {
 
 
 ## Controllers
+
+**create `./ngApp/controllers/controllers.ts`**
+
 ```javascript
 namespace passportDemo.Controllers {
 export class MainController {
