@@ -1,6 +1,6 @@
 var passportDemo;
 (function (passportDemo) {
-    angular.module('passportDemo', ['ui.router', 'ngResource', 'ngCookies'])
+    angular.module('passportDemo', ['ui.router', 'ngResource'])
         .config(function ($resourceProvider, $stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
         $stateProvider
             .state('main', {
@@ -63,14 +63,11 @@ var passportDemo;
             rewriteLinks: false
         });
         $httpProvider.interceptors.push('authInterceptor');
-    }).factory('authInterceptor', ['$q', '$cookies', '$location',
-        function ($q, $cookies, $location) {
+    }).factory('authInterceptor', ['$q', '$location',
+        function ($q, $location) {
             return {
                 request: function (config) {
                     config.headers = config.headers || {};
-                    if ($cookies.get('token')) {
-                        config.headers.Authorization = 'Bearer ' + $cookies.get('token');
-                    }
                     return config;
                 },
                 responseError: function (response) {

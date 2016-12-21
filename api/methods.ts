@@ -5,7 +5,6 @@ import * as jwt from 'jsonwebtoken';
 import * as session from 'express-session';
 import User from '../models/User';
 let router = express.Router();
-// let ensureLogin = require('connect-ensure-login').ensureLoggedIn;
 
 //Express has Express.Request but the interface isn't very good...  requires overrides
 function setSession(req, res, next, user) {

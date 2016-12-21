@@ -1,5 +1,5 @@
 namespace passportDemo {
-  angular.module('passportDemo', ['ui.router', 'ngResource', 'ngCookies'])
+  angular.module('passportDemo', ['ui.router', 'ngResource'])
     .config((
       $resourceProvider: ng.resource.IResourceServiceProvider,
       $stateProvider: ng.ui.IStateProvider,
@@ -66,6 +66,7 @@ namespace passportDemo {
       $urlRouterProvider.otherwise('/notFound');
 
       // Enable HTML5 navigation
+      // allow express routing
       $locationProvider.html5Mode({
         enabled: true,
         requireBase: false,
@@ -75,15 +76,12 @@ namespace passportDemo {
       //for authInterceptor factory
       $httpProvider.interceptors.push('authInterceptor');
     }).factory('authInterceptor',
-      ['$q', '$cookies', '$location',
-      function ($q, $cookies, $location) {
+      ['$q','$location',
+      function ($q, $location) {
       return {
         // Add authorization token to headers PER req
         request: function (config) {
           config.headers = config.headers || {};
-          if ($cookies.get('token')) {
-            config.headers.Authorization = 'Bearer ' + $cookies.get('token');
-          }
           return config;
         },
 

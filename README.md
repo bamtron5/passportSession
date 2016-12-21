@@ -32,15 +32,9 @@ ADMIN_EMAIL=admin@admin.com
 ```
 
 ##Installation and Types
-`npm i --save connect-mongo express-session passport passport-http-bearer passport-local jsonwebtoken crypto`
+`npm i --save connect-mongo express-session passport passport-http-bearer passport-local jsonwebtoken crypto passport-facebook`
 
-`npm i --save @types/connect-mongo @types/express-session @types/passport @types/passport-http-bearer @types/passport-local @types/jsonwebtoken @types/crypto`
-
-`bower i --save angular-cookies`
-
-Place this into your index.ejs file `<script src="/bower_components/angular-cookies/angular-cookies.min.js"></script>`
-
-Inject `ngCookies` into your app.
+`npm i --save @types/connect-mongo @types/express-session @types/passport @types/passport-http-bearer @types/passport-local @types/jsonwebtoken @types/crypto @types/passport-facebook`
 
 ##Configure Passport
 
@@ -50,7 +44,7 @@ Inject `ngCookies` into your app.
 import * as passport from 'passport';
 import * as mongoose from 'mongoose';
 let LocalStrategy = require('passport-local').Strategy;
-let BearerStrategy = require('passport-http-bearer').Strategy;
+let FacebookStrategy = require('passport-facebook').Strategy;
 import User from '../models/User';
 import * as jwt from 'jsonwebtoken';
 
@@ -64,14 +58,29 @@ passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
 
-passport.use(new BearerStrategy(
-  function(token, done) {
-    let user = jwt.verify(token, process.env.JWT_SECRET);
-    User.findOne({ username: user.username }, function (err, user) {
-      if (err) { return done(err); }
-      if (!user) { return done(null, false); }
-      return done(null, user);
-    }).select('-passwordHash -salt');
+passport.use(new FacebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
+    callbackURL: process.env.ROOT_URL + "/auth/facebook/callback",
+    profileFields: ['id', 'displayName', 'photos'],
+    display: 'popup'
+  },
+  function(accessToken, refreshToken, profile, done) {
+    User.findOne({ facebookId: profile.id }, function (err, user) {
+      if (user) {
+        return done(err, user);
+      } else {
+        let u = new User();
+        u.username = profile.displayName;
+        u.facebookId = profile.id;
+        u.facebook.name = profile.displayName;
+        u.facebook.token = accessToken;
+        u.save((err) => {
+          if (err) throw err;
+          return done(null, u);
+        });
+      }
+    });
   }
 ));
 
@@ -88,9 +97,7 @@ passport.use(new LocalStrategy(function(username: String, password: string, done
 
 *note:* Please note this line `.select('-passwordHash -salt');`.  This will prevent your `passport.authenticate('bearer')` (*token checks*) from returning a passwordHash and salt.  !!!
 
-*note:* Passport is useful middle ware to check the token before routing.  During this time it will also set `req.user`.  The next call in the stack can be checked for the user by req.  
-
-*note:* Passport `BearerStrategy` has access to your server token.  This token will be set in our `/api/Local/Login` method.
+*note:* Passport is useful middle ware to check the token before routing.  During this time it will also set `req.user`.  The next call in the stack can be checked for the user by req.
 
 ##Configure your Session
 Here is what the main server file should resemble.  Please read my comments and note the imports of
@@ -154,7 +161,6 @@ app.use(session({
 //connect to DB
 let dbc = mongoose.connect(process.env.MONGO_URI);
 
-//Seed an admin user
 mongoose.connection.on('connected', () => {
   User.findOne({username: 'admin'}, (err, user) => {
     if(err) return;
@@ -177,11 +183,24 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(passport.initialize());
+app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+//pathing
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/bower_components', express.static(path.join(__dirname, 'bower_components')));
+app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
+app.use('/ngApp', express.static(path.join(__dirname, 'ngApp')));
+
+//mount api
+app.use('/api', require('./api/users'));
+
+//routes
+app.use('/', routes);
 ...
 
 ```
-*note:* init passport with this line `app.use(passport.initialize());`
+*note:* init passport with this line `app.use(passport.initialize());` then `app.use(passport.session())`
 
 *note:* `sess.secure` will set our secure flag on https servers for deployment.
 
@@ -191,11 +210,19 @@ import * as mongoose from 'mongoose';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 
+export interface IFacebook {
+  token: string,
+  name: string,
+  email: string
+}
+
 export interface IUser extends mongoose.Document {
   username: { type: String, lowercase: true, unique: true},
   email: { type: String, unique: true, lowercase: true },
   passwordHash: String,
   salt: String,
+  facebookId: String,
+  facebook: IFacebook,
   setPassword(password: string): boolean,
   validatePassword(password: string): boolean,
   generateJWT(): JsonWebKey,
@@ -207,6 +234,12 @@ let UserSchema = new mongoose.Schema({
   email: { type: String, unique: true, lowercase: true },
   passwordHash: String,
   salt: String,
+  facebookId: String,
+  facebook: {
+    token: String,
+    name: String,
+    email: String
+  },
   roles: {type: Array, default: ['user']}
 });
 
@@ -222,6 +255,7 @@ UserSchema.method('validatePassword', function(password) {
 
 UserSchema.method('generateJWT', function() {
   return jwt.sign({
+    id: this._id.toString(),
     _id: this._id,
     username: this.username,
     email: this.email
@@ -229,16 +263,15 @@ UserSchema.method('generateJWT', function() {
 });
 
 export default mongoose.model<IUser>("User", UserSchema);
-
 ```
 
 *note:* Methods are associated with the User model to assist the process of validating passwords, setting passwords hashes, and signing tokens.
 
-## Users API
+## API Methods
+*create `./api/methods.ts`*
 
-**create:** `./api/users.ts`
 ```javascript
-import express = require('express');
+import * as express from 'express';
 import * as mongoose from 'mongoose';
 import * as passport from 'passport';
 import * as jwt from 'jsonwebtoken';
@@ -246,59 +279,20 @@ import * as session from 'express-session';
 import User from '../models/User';
 let router = express.Router();
 
-router.get('/users/:id', function(req, res, next) {
-  User.findOne(req.params._id).select('-passwordHash -salt').then((user) => {
-    return res.status(200).json(user);
-  }).catch((err) => {
-    return res.status(404).json({err: 'User not found.'})
+//Express has Express.Request but the interface isn't very good...  requires overrides
+function setSession(req, res, next, user) {
+  let token = user.generateJWT();
+
+  return req.logIn(user, (err) => {
+    if (err) res.status(500).json({message: 'login failed'});
+    return req.session.save(function (err){
+      if (err) res.sendStatus(500).json({message: 'session failed'});
+      return res.redirect('/profile');
+    });
   });
-});
+}
 
-//CONSTANTLY RETURNS 200 because we are always authorized to check.
-router.get('/currentuser', (req, res, next) => {
-  passport.authenticate('bearer', function(err, user) {
-    if (err) return next(err);
-    if (!user) return res.status(200).json({});
-    console.log(req.isAuthenticated());
-
-    return res.status(200).json(user);
-  })(req, res, next);
-});
-
-router.post('/Register', function(req, res, next) {
-  let user = new User();
-  user.username = req.body.username;
-  user.email = req.body.email;
-  user.setPassword(req.body.password);
-  user.save(function(err, user) {
-    if(err) return next(err);
-    res.status(200).json({message: "Registration complete."});
-  });
-});
-
-router.post('/login/local', function(req, res, next) {
-  if(!req.body.username || !req.body.password){
-    return res.status(400).json({message: "Please fill out every field"});
-  }
-
-  passport.authenticate('local', function(err, user, info) {
-    if(err) return next(err);
-    if(user) {
-      let token = user.generateJWT();
-
-      return req.logIn(user, (err) => {
-        if (err) res.status(500).json({message: 'login failed'});
-        return req.session.save(function (err){
-          if (err) res.status(500).json({message: 'session failed'});
-          return res.json({ token: token, isAuthenticated: req.isAuthenticated()});
-        });
-      });
-    }
-    return res.status(400).json(info);
-  })(req, res, next);
-});
-
-router.get('/logout/local', function(req, res, next) {
+function destroySession(req, res, next) {
   req.logout();
 
   req.session.destroy((err) => {
@@ -306,17 +300,84 @@ router.get('/logout/local', function(req, res, next) {
     req.user = null;
     return res.json({isAuthenticated: req.isAuthenticated()});
   });
+}
+
+const methods = {
+  setSession: setSession,
+  destroySession: destroySession
+}
+
+export default methods;
+```
+
+## Users API
+
+**create:** `./api/users.ts`
+```javascript
+import * as mongoose from 'mongoose';
+import * as crypto from 'crypto';
+import * as jwt from 'jsonwebtoken';
+
+export interface IFacebook {
+  token: string,
+  name: string,
+  email: string
+}
+
+export interface IUser extends mongoose.Document {
+  username: { type: String, lowercase: true, unique: true},
+  email: { type: String, unique: true, lowercase: true },
+  passwordHash: String,
+  salt: String,
+  facebookId: String,
+  facebook: IFacebook,
+  setPassword(password: string): boolean,
+  validatePassword(password: string): boolean,
+  generateJWT(): JsonWebKey,
+  roles: Array<String>
+}
+
+let UserSchema = new mongoose.Schema({
+  username: { type: String, lowercase: true, unique: true},
+  email: { type: String, unique: true, lowercase: true },
+  passwordHash: String,
+  salt: String,
+  facebookId: String,
+  facebook: {
+    token: String,
+    name: String,
+    email: String
+  },
+  roles: {type: Array, default: ['user']}
 });
 
-export = router;
+UserSchema.method('setPassword', function(password) {
+  this.salt = crypto.randomBytes(16).toString('hex');
+  this.passwordHash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
+});
+
+UserSchema.method('validatePassword', function(password) {
+  let hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
+  return (hash === this.passwordHash);
+});
+
+UserSchema.method('generateJWT', function() {
+  return jwt.sign({
+    id: this._id.toString(),
+    _id: this._id,
+    username: this.username,
+    email: this.email
+  }, process.env.JWT_SECRET, {expiresIn: '2 days'});
+});
+
+export default mongoose.model<IUser>("User", UserSchema);
 ```
 *note:* Passport should login, then session should be saved in db.  Session is destroyed and passports logs out on logout.
 
 ## Angular App
 ```javascript
 namespace passportDemo {
-  //TODO components
-  angular.module('passportDemo', ['ui.router', 'ngResource', 'ngCookies'])
+  angular.module('passportDemo', ['ui.router', 'ngResource'])
     .config((
       $resourceProvider: ng.resource.IResourceServiceProvider,
       $stateProvider: ng.ui.IStateProvider,
@@ -325,7 +386,6 @@ namespace passportDemo {
       $httpProvider: ng.IHttpProvider
     ) => {
       // Define routes
-      //
       $stateProvider
         .state('main', {
           url: '',
@@ -333,8 +393,15 @@ namespace passportDemo {
           templateUrl: '/ngApp/views/main.html',
           controller: passportDemo.Controllers.MainController,
           controllerAs: 'vm',
-          data: {
-            currentUser: new Promise(() => {}) //RESOLVED by MainController to state.current.data.currentUser
+          resolve: {
+            currentUser: [
+              'UserService', '$state', (UserService, $state) => {
+                return UserService.getCurrentUser((user) => {
+                  return user;
+                }).catch((e) => {
+                  return { username: false };
+                });
+              }]
           }
         })
         .state('main.home', {
@@ -356,29 +423,43 @@ namespace passportDemo {
           controller: passportDemo.Controllers.UserController,
           controllerAs: 'vm'
         })
+        .state('main.profile', {
+          url: '/profile',
+          templateUrl: '/ngApp/views/profile.html',
+          controller: passportDemo.Controllers.ProfileController,
+          controllerAs: 'vm'
+        })
         .state('notFound', {
           url: '/notFound',
           templateUrl: '/ngApp/views/notFound.html'
+        })
+        .state('main.authsuccess', {
+          url: '/authsuccess',
+          templateUrl: '/ngApp/views/authsuccess.html',
+          controller: passportDemo.Controllers.ProfileController,
+          controllerAs: 'vm'
         });
 
       // Handle request for non-existent route
       $urlRouterProvider.otherwise('/notFound');
 
       // Enable HTML5 navigation
-      $locationProvider.html5Mode(true);
+      // allow express routing
+      $locationProvider.html5Mode({
+        enabled: true,
+        requireBase: false,
+        rewriteLinks: false
+      });
 
       //for authInterceptor factory
       $httpProvider.interceptors.push('authInterceptor');
     }).factory('authInterceptor',
-      ['$q', '$cookies', '$location',
-      function ($q, $cookies, $location) {
+      ['$q','$location',
+      function ($q, $location) {
       return {
         // Add authorization token to headers PER req
         request: function (config) {
           config.headers = config.headers || {};
-          if ($cookies.get('token')) {
-            config.headers.Authorization = 'Bearer ' + $cookies.get('token');
-          }
           return config;
         },
 
@@ -400,8 +481,8 @@ namespace passportDemo {
       }
     }])
     .run([
-      '$rootScope', '$location',
-      function($rootScope, $location) {
+      '$rootScope', '$location', 'UserService', '$state', '$q',
+      function($rootScope, $location, UserService, $state, $q) {
       // Redirect to login if route requires auth and you're not logged in
       $rootScope.$on('$stateChangeStart', function (event, next) {
         // console.log(`GOING TO: ${next.url}`);
@@ -412,117 +493,113 @@ namespace passportDemo {
 
 *note:* we have created an `abstract` state called `main`.  ALL other states will inherit this.  It `$state.current.data.currentUser` is a promise that can be resolved in the `MainController` by our `/api/currentuser` method.
 
-*note:* authInterceptor will set `req.header` with `Bearer: ` `tokenvalue`.  Also a great way for angular to redirect certain server statuses like `401 UNAUTHORIZED` or `403 FORBIDDEN`
+*note:* authInterceptor is a  great way for angular to redirect certain server statuses like `401 UNAUTHORIZED` or `403 FORBIDDEN`
+
 
 ## Controllers
 ```javascript
 namespace passportDemo.Controllers {
-  export class MainController {
-    public currentUser;
-    public self = this;
+export class MainController {
+  public currentUser;
+  public self = this;
 
-    constructor(
-      private UserService: passportDemo.Services.UserService,
-      private $state: ng.ui.IStateService,
-      private $cookies: ng.cookies.ICookiesService,
-      private $q: ng.IQService
-    ) {
-      $state.current.data.currentUser = $q.defer();
-
-      this.UserService.getCurrentUser().then((user) => {
-        this.currentUser = user;
-        $state.current.data.currentUser.resolve(user);
-      }).catch(() => {
-        this.currentUser = false;
-        $state.current.data.currentUser.reject(false);
-      });
-    }
-
-    logout() {
-      this.UserService.logout().then(() => {
-        this.$cookies.remove('token');
-        this.$state.go('main.home', null, {reload: true, notify:true});
-      }).catch(() => {
-        throw new Error('Unsuccessful logout');
-      });
-    }
+  constructor(
+    private UserService: passportDemo.Services.UserService,
+    private $state: ng.ui.IStateService,
+    currentUser: ng.ui.IResolvedState
+  ) {
+    this.currentUser = currentUser;
   }
 
-  export class HomeController {
-    public currentUser;
-    constructor(
-      private $state: ng.ui.IStateService
-    ) {
-      $state.current.data.currentUser.promise.then((user) => {
-        this.currentUser = user;
-      }).catch((user) => {
-        this.currentUser = user;
-      });
-    }
+  logout() {
+    this.UserService.logout().then(() => {
+      this.$state.go('main.home', null, {reload: true, notify:true});
+    }).catch(() => {
+      throw new Error('Unsuccessful logout');
+    });
+  }
+}
+
+export class HomeController {
+  public currentUser;
+  constructor(
+    private $state: ng.ui.IStateService,
+    currentUser: ng.ui.IResolvedState,
+    private $cookies: ng.cookies.ICookiesService
+  ) {
+
+    this.currentUser = currentUser;
+  }
+}
+
+export class UserController {
+  public user;
+  public currentUser;
+  public isLoggedIn;
+
+  public login(user) {
+    this.UserService.login(user).then((res) => {
+      this.$state.go('main.profile', null, {reload: true, notify:true});
+    }).catch((err) => {
+      alert('Bunk login, please try again.');
+    });
   }
 
-  export class UserController {
-    public user;
-    public currentUser;
-    public isLoggedIn;
+  public register(user) {
+    this.UserService.register(user).then((res) => {
+      this.$state.go('main.login');
+    }).catch((err) => {
+      alert('Registration error: please try again.');
+    });
+  }
 
-    public login(user) {
-      this.UserService.login(user).then((res) => {
-        this.$cookies.put('token', res.token);
-        this.$state.go('main.home', null, {reload: true, notify:true});
-      }).catch((err) => {
-        alert('Bunk login, please try again.');
-      });
+  constructor(
+    private UserService:passportDemo.Services.UserService,
+    private $state: ng.ui.IStateService
+  ) {
+  }
+}
+
+export class ProfileController {
+  public avatar:string;
+  public currentUser;
+  constructor(
+    currentUser: ng.ui.IResolvedState,
+    $state: ng.ui.IStateService
+  ) {
+
+    this.currentUser = currentUser;
+    //u must b auth br0 *redirected w/ angular*
+    //should be done from stateProvider
+    if(!currentUser['username']) {
+      $state.go('main.login', null, { reload: true, notify: true });
     }
 
-    public register(user) {
-      this.UserService.register(user).then((res) => {
-        this.$state.go('main.login');
-      }).catch((err) => {
-        alert('Registration error: please try again.');
-      });
-    }
-
-    constructor(
-      private UserService:passportDemo.Services.UserService,
-      private $state: ng.ui.IStateService,
-      private $cookies: ng.cookies.ICookiesService
-    ) {
+    if(currentUser['facebookId']){
+      this.avatar = `//graph.facebook.com/v2.8/${currentUser['facebookId']}/picture`;
+    } else {
+      this.avatar = '//placehold.it/350x350';
     }
   }
 }
+}
 ```
 
-* `$q` is used to resolve the promise from state so all sub controllers can inherit this state asynchronously.
-* During the login and logout phases we are adding and removing the cookie on client.
-
 ## Add Angular view files
-**create:** `home.html` `login.html` `register.html` and `main.html`
+**create:** `home.html` `login.html` `register.html` `main.html` `profile.html`
 Please inspect my commits for the files.  If you're having issues please contact me.
 
 ## Testing
 *Login with username: `admin` and password `password`*
 
 * Then check your db to see the session table
-* Check your application tab in your dev tools for the cookies `cid` and `token`
-* Logout and maksure the session table has removed the record
+* Logout and make sure the session table has removed the record
+* Test facebook auth.  try in different devices.
 
 *Register a regular user*
 
 * Login w/ this user
 * Then check your db to see the session table
-* Check your application tab in your dev tools for the cookies `cid` and `token`
-* Logout and maksure the session table has removed the record
-
-## Middleware checks
-*sample*
-
-`router.get('/stuff', passport.authenticate('bearer'), function(req, res, next){})`
-
-this would return `401` if unauthenticated
-
-* TODO
-  * API should check user roles
-  * Support for localStorage
+* Logout and make sure the session table has removed the record
 
 ![](https://media.giphy.com/media/xT9DPQvQ4wuYAbCRtC/giphy.gif "")
