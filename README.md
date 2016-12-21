@@ -1,7 +1,7 @@
 #Passport Local w/ Express-Session
 Passport is great for middleware functions and configuration.  Express-Session will supply a cid cookie `connectionId`, a token cookie from jwt, and a mongo table that will track user sessions in your DB.  This gives your app persistance in the client and tracking in the DB if need be.  
 
-##Prereq
+## Prereq
 * I assume you have a User model and a mongoose connection
 * I assume are on node engine `~6.9.1` || `<7.0.0`
 * I assume you are using dotenv for development env.  If not:
@@ -40,12 +40,12 @@ FACEBOOK_APP_ID=yourFacebookAppId
 FACEBOOK_APP_SECRET=yourFacebookSecret
 ```
 
-##Installation and Types
+## Installation and Types
 `npm i --save connect-mongo express-session passport  passport-local jsonwebtoken crypto passport-facebook`
 
 `npm i --save @types/connect-mongo @types/express-session @types/passport  @types/passport-local @types/jsonwebtoken @types/crypto @types/passport-facebook`
 
-##Configure Passport
+## Configure Passport
 
 **create:** `./config/passport.ts`
 
@@ -108,7 +108,7 @@ passport.use(new LocalStrategy(function(username: String, password: string, done
 
 *note:* Passport is useful middle ware to check the token before routing.  During this time it will also set `req.user`.  The next call in the stack can be checked for the user by req.
 
-##Configure your Session
+## Configure your Session
 Here is what the main server file should resemble.  Please read my comments and note the imports of
 * `import * as passport from 'passport';`
 * `import * as session from 'express-session';`
@@ -302,11 +302,11 @@ function setSession(req, res, next, user) {
 }
 
 function destroySession(req, res, next) {
-  req.logout();
 
   req.session.destroy((err) => {
     if (err) return res.status(500).json({message: 'still authenticated, please try again.'});
     req.user = null;
+    req.logout();
     return res.json({isAuthenticated: req.isAuthenticated()});
   });
 }
@@ -376,6 +376,8 @@ export = router;
 ```
 *note:* Passport should login, then session should be saved in db.  Session is destroyed and passports logs out on logout.
 
+**create `./ngApp/app.ts`**
+
 ## Angular App
 ```javascript
 namespace passportDemo {
@@ -434,12 +436,6 @@ namespace passportDemo {
         .state('notFound', {
           url: '/notFound',
           templateUrl: '/ngApp/views/notFound.html'
-        })
-        .state('main.authsuccess', {
-          url: '/authsuccess',
-          templateUrl: '/ngApp/views/authsuccess.html',
-          controller: passportDemo.Controllers.ProfileController,
-          controllerAs: 'vm'
         });
 
       // Handle request for non-existent route

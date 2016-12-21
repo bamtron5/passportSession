@@ -49,12 +49,6 @@ var passportDemo;
             .state('notFound', {
             url: '/notFound',
             templateUrl: '/ngApp/views/notFound.html'
-        })
-            .state('main.authsuccess', {
-            url: '/authsuccess',
-            templateUrl: '/ngApp/views/authsuccess.html',
-            controller: passportDemo.Controllers.ProfileController,
-            controllerAs: 'vm'
         });
         $urlRouterProvider.otherwise('/notFound');
         $locationProvider.html5Mode({

@@ -14,10 +14,10 @@ function setSession(req, res, next, user) {
     });
 }
 function destroySession(req, res, next) {
-    req.logout();
     req.session.destroy(function (err) {
         if (err)
             return res.status(500).json({ message: 'still authenticated, please try again.' });
+        req.logout();
         req.user = null;
         return res.json({ isAuthenticated: req.isAuthenticated() });
     });
