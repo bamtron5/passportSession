@@ -1,4 +1,4 @@
-#Passport Local w/ Express-Session
+# Passport Local w/ Express-Session
 Passport is great for middleware functions and configuration.  Express-Session will supply a cid cookie `connectionId`, a token cookie from jwt, and a mongo table that will track user sessions in your DB.  This gives your app persistance in the client and tracking in the DB if need be.  
 
 ## Prereq
@@ -23,13 +23,15 @@ If you don't have NVM (Node Version Manager) please install it
 
 * Name your app
 * whitelist your domain `http://localhost:3000`
+* add a login production
+* make sure to add a call back URI `http://localhost:3000/auth/facebook/callback`
 
 **create** `.nvmrc` and add `lts/*`.  Which stands for latest.
 
 **create** `.env`
 
 ```
-ROOT_URL=http:/localhost:3000
+ROOT_URL=http://localhost:3000
 MONGO_URI=mongodb://localhost:27017/passport-demo
 JWT_SECRET=SecretKey
 SESSION_SECRET=SecretKey

@@ -1,4 +1,4 @@
-  namespace passportDemo.Controllers {
+namespace passportDemo.Controllers {
   export class MainController {
     public currentUser;
     public self = this;
