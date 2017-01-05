@@ -23,11 +23,13 @@ router.get('/currentuser', (req, res, next) => {
 });
 
 router.post('/Register', function(req, res, next) {
+  console.log(req.body);
   let user = new User();
   user.username = req.body.username;
   user.email = req.body.email;
   user.setPassword(req.body.password);
   user.save(function(err, user) {
+    console.log(err);
     if(err) return next(err);
     res.status(200).json({message: "Registration complete."});
   });

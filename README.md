@@ -60,11 +60,9 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(obj, done) {
-  passport.deserializeUser(function(obj, done) {
-    User.findOne({_id: obj._id}, {passwordHash: 0, salt: 0}, (err, user) => {
-      if (err) done(null, {});
-      done(null, user);
-    });
+  User.findOne({_id: obj._id}, {passwordHash: 0, salt: 0}, (err, user) => {
+    if (err) done(null, {});
+    done(null, user);
   });
 });
 

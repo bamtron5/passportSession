@@ -17,11 +17,13 @@ router.get('/currentuser', function (req, res, next) {
     return res.json(req.user);
 });
 router.post('/Register', function (req, res, next) {
+    console.log(req.body);
     var user = new User_1.default();
     user.username = req.body.username;
     user.email = req.body.email;
     user.setPassword(req.body.password);
     user.save(function (err, user) {
+        console.log(err);
         if (err)
             return next(err);
         res.status(200).json({ message: "Registration complete." });
