@@ -1,5 +1,5 @@
 # Passport Local w/ Express-Session
-Passport is great for middleware functions and configuration.  Express-Session will supply a cid cookie `connectionId`, a token cookie from jwt, and a mongo table that will track user sessions in your DB.  This gives your app persistance in the client and tracking in the DB if need be.  
+Passport is great for middleware functions and configuration.
 
 ## Prereq
 * I assume you have a User model and a mongoose connection
@@ -15,9 +15,6 @@ if (app.get('env') === 'development') {
 }
 ```
 
-If you don't have NVM (Node Version Manager) please install it
-[NVM Docs on .nvmrc](https://github.com/creationix/nvm#nvmrc)
-
 **register**
 [Facebook app registration](https://developers.facebook.com/apps/)
 
@@ -25,8 +22,6 @@ If you don't have NVM (Node Version Manager) please install it
 * whitelist your domain `http://localhost:3000`
 * add a login production
 * make sure to add a call back URI `http://localhost:3000/auth/facebook/callback`
-
-**create** `.nvmrc` and add `lts/*`.  Which stands for latest.
 
 **create** `.env`
 
@@ -43,9 +38,9 @@ FACEBOOK_APP_SECRET=yourFacebookSecret
 ```
 
 ## Installation and Types
-`npm i --save connect-mongo express-session passport  passport-local jsonwebtoken crypto passport-facebook`
+`npm i --save connect-mongo passport  passport-local jsonwebtoken crypto passport-facebook`
 
-`npm i --save @types/connect-mongo @types/express-session @types/passport  @types/passport-local @types/jsonwebtoken @types/crypto @types/passport-facebook`
+`npm i --save @types/connect-mongo @types/passport  @types/passport-local @types/jsonwebtoken @types/passport-facebook`
 
 ## Configure Passport
 
@@ -65,16 +60,19 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(obj, done) {
-  // console.log('deserializeUser', obj);
-  done(null, obj);
+  passport.deserializeUser(function(obj, done) {
+    User.findOne({_id: obj._id}, {passwordHash: 0, salt: 0}, (err, user) => {
+      if (err) done(null, {});
+      done(null, user);
+    });
+  });
 });
 
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
     callbackURL: process.env.ROOT_URL + "/auth/facebook/callback",
-    profileFields: ['id', 'displayName', 'photos'],
-    display: 'popup'
+    profileFields: ['id', 'displayName', 'photos']
   },
   function(accessToken, refreshToken, profile, done) {
     User.findOne({ facebookId: profile.id }, function (err, user) {
@@ -113,8 +111,6 @@ passport.use(new LocalStrategy(function(username: String, password: string, done
 ## Configure your Session
 Here is what the main server file should resemble.  Please read my comments and note the imports of
 * `import * as passport from 'passport';`
-* `import * as session from 'express-session';`
-* `const MongoStore = require('connect-mongo')(session);`
 
 **create: `./app.ts`**
 
@@ -127,8 +123,6 @@ import * as bodyParser from 'body-parser';
 import * as ejs from 'ejs';
 import * as mongoose from 'mongoose';
 import * as passport from 'passport';
-import * as session from 'express-session';
-const MongoStore = require('connect-mongo')(session);
 import routes from './routes/index';
 import User from './models/User';
 
@@ -289,7 +283,6 @@ import * as express from 'express';
 import * as mongoose from 'mongoose';
 import * as passport from 'passport';
 import * as jwt from 'jsonwebtoken';
-import * as session from 'express-session';
 import User from '../models/User';
 let router = express.Router();
 
@@ -333,7 +326,6 @@ import express = require('express');
 import * as mongoose from 'mongoose';
 import * as passport from 'passport';
 import * as jwt from 'jsonwebtoken';
-import * as session from 'express-session';
 import methods from './methods';
 import User from '../models/User';
 let router = express.Router();
@@ -364,7 +356,7 @@ router.post('/Register', function(req, res, next) {
 });
 
 router.post('/login/local', function(req, res, next) {
-  if(!req.body.username || !req.body.password){
+  if(!req.body.username && !req.body.password){
     return res.status(400).json({message: "Please fill out every field"});
   }
 

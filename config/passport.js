@@ -7,7 +7,11 @@ passport.serializeUser(function (user, done) {
     done(null, user);
 });
 passport.deserializeUser(function (obj, done) {
-    done(null, obj);
+    User_1.default.findOne({ _id: obj._id }, { passwordHash: 0, salt: 0 }, function (err, user) {
+        if (err)
+            done(null, {});
+        done(null, user);
+    });
 });
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,

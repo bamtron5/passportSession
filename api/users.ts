@@ -18,6 +18,7 @@ router.get('/users/:id', function(req, res, next) {
 //CONSTANTLY RETURNS 200 because we are always authorized to check.
 router.get('/currentuser', (req, res, next) => {
   if (!req.user) return res.json({});
+  // console.log(req.user);
   return res.json(req.user);
 });
 
