@@ -2,7 +2,7 @@ import * as passport from 'passport';
 import * as mongoose from 'mongoose';
 let LocalStrategy = require('passport-local').Strategy;
 let FacebookStrategy = require('passport-facebook').Strategy;
-import User from '../models/User';
+import User from '../models/Users';
 import * as jwt from 'jsonwebtoken';
 
 passport.serializeUser(function(user, done) {

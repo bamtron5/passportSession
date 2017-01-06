@@ -2,7 +2,7 @@
 var express = require("express");
 var passport = require("passport");
 var methods_1 = require("./methods");
-var User_1 = require("../models/User");
+var User_1 = require("../models/Users");
 var router = express.Router();
 router.get('/users/:id', function (req, res, next) {
     User_1.default.findOne(req.params._id).select('-passwordHash -salt').then(function (user) {

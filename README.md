@@ -51,7 +51,7 @@ import * as passport from 'passport';
 import * as mongoose from 'mongoose';
 let LocalStrategy = require('passport-local').Strategy;
 let FacebookStrategy = require('passport-facebook').Strategy;
-import User from '../models/User';
+import User from '../models/Users';
 import * as jwt from 'jsonwebtoken';
 
 passport.serializeUser(function(user, done) {
@@ -122,7 +122,7 @@ import * as ejs from 'ejs';
 import * as mongoose from 'mongoose';
 import * as passport from 'passport';
 import routes from './routes/index';
-import User from './models/User';
+import User from './models/Users';
 
 //create the app
 let app = express();
@@ -281,7 +281,7 @@ import * as express from 'express';
 import * as mongoose from 'mongoose';
 import * as passport from 'passport';
 import * as jwt from 'jsonwebtoken';
-import User from '../models/User';
+import User from '../models/Users';
 let router = express.Router();
 
 //Express has Express.Request but the interface isn't very good...  requires overrides
@@ -325,7 +325,7 @@ import * as mongoose from 'mongoose';
 import * as passport from 'passport';
 import * as jwt from 'jsonwebtoken';
 import methods from './methods';
-import User from '../models/User';
+import User from '../models/Users';
 let router = express.Router();
 
 router.get('/users/:id', function(req, res, next) {

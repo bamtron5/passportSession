@@ -9,7 +9,7 @@ import * as passport from 'passport';
 import * as session from 'express-session';
 const MongoStore = require('connect-mongo')(session);
 import routes from './routes/index';
-import User from './models/User';
+import User from './models/Users';
 
 //create the app
 let app = express();

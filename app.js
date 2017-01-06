@@ -8,7 +8,7 @@ var passport = require("passport");
 var session = require("express-session");
 var MongoStore = require('connect-mongo')(session);
 var index_1 = require("./routes/index");
-var User_1 = require("./models/User");
+var User_1 = require("./models/Users");
 var app = express();
 if (app.get('env') === 'development') {
     var dotenv = require('dotenv');
