@@ -24,18 +24,18 @@ var sess = {
 if (app.get('env') === 'production') {
     sess.secure = true;
 }
-app.use(session({
-    cookie: sess,
-    secret: process.env.SESSION_SECRET,
-    store: new MongoStore({
-        url: process.env.MONGO_URI
-    }),
-    unset: 'destroy',
-    resave: false,
-    saveUninitialized: false
-}));
 var dbc = mongoose.connect(process.env.MONGO_URI);
 mongoose.connection.on('connected', function () {
+    app.use(session({
+        cookie: sess,
+        secret: process.env.SESSION_SECRET,
+        store: new MongoStore({
+            url: process.env.MONGO_URI
+        }),
+        unset: 'destroy',
+        resave: false,
+        saveUninitialized: false
+    }));
     Users_1.User.findOne({ username: 'admin' }, function (err, user) {
         if (err)
             return;

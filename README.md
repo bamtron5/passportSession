@@ -150,22 +150,23 @@ if (app.get('env') === 'production') {
   sess.secure = true // serve secure cookies
 }
 
-//use session config
-app.use(session({
-  cookie: sess,
-  secret: process.env.SESSION_SECRET, // can support an array
-  store: new MongoStore({
-    url: process.env.MONGO_URI
-  }),
-  unset: 'destroy',
-  resave: false,
-  saveUninitialized: false //if nothing has changed.. do not restore cookie
-}));
-
 //connect to DB
 let dbc = mongoose.connect(process.env.MONGO_URI);
 
 mongoose.connection.on('connected', () => {
+
+  //use session config
+  app.use(session({
+    cookie: sess,
+    secret: process.env.SESSION_SECRET, // can support an array
+    store: new MongoStore({
+      url: process.env.MONGO_URI
+    }),
+    unset: 'destroy',
+    resave: false,
+    saveUninitialized: false //if nothing has changed.. do not restore cookie
+  }));
+
   User.findOne({username: 'admin'}, (err, user) => {
     if(err) return;
     if(user) return;
