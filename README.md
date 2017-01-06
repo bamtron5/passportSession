@@ -37,9 +37,9 @@ FACEBOOK_APP_SECRET=yourFacebookSecret
 ```
 
 ## Installation and Types
-`npm i --save connect-mongo passport  passport-local jsonwebtoken crypto passport-facebook`
+`npm i --save connect-mongo passport  passport-local jsonwebtoken crypto passport-facebook connect-mongo express-session`
 
-`npm i --save @types/connect-mongo @types/passport  @types/passport-local @types/jsonwebtoken @types/passport-facebook`
+`npm i --save @types/connect-mongo @types/passport @types/express-session @types/passport-local @types/jsonwebtoken @types/passport-facebook`
 
 ## Configure Passport
 
