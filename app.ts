@@ -9,7 +9,7 @@ import * as passport from 'passport';
 import * as session from 'express-session';
 const MongoStore = require('connect-mongo')(session);
 import routes from './routes/index';
-import User from './models/Users';
+import {User} from './models/Users';
 
 //create the app
 let app = express();
@@ -104,27 +104,23 @@ app.use((req, res, next) => {
   next(err);
 });
 
-
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-  app.use((err: Error, req, res, next) => {
-
+  app.use((err, res) => {
     res.status(err['status'] || 500);
     res.render('error', {
-      message: err.message,
+      message: err['message'],
       error: err
     });
   });
 }
 
 // production error handler
-// no stacktraces leaked to user
-// TODO Error interface
-app.use((err:Error, req, res, next) => {
+app.use((err, res) => {
   res.status(err['status'] || 500);
   res.render('error', {
-    message: err.message,
+    message: err['message'],
     error: {}
   });
 });

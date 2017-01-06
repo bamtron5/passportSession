@@ -8,7 +8,7 @@ var passport = require("passport");
 var session = require("express-session");
 var MongoStore = require('connect-mongo')(session);
 var index_1 = require("./routes/index");
-var User_1 = require("./models/Users");
+var Users_1 = require("./models/Users");
 var app = express();
 if (app.get('env') === 'development') {
     var dotenv = require('dotenv');
@@ -36,13 +36,13 @@ app.use(session({
 }));
 var dbc = mongoose.connect(process.env.MONGO_URI);
 mongoose.connection.on('connected', function () {
-    User_1.default.findOne({ username: 'admin' }, function (err, user) {
+    Users_1.User.findOne({ username: 'admin' }, function (err, user) {
         if (err)
             return;
         if (user)
             return;
         if (!user)
-            var admin = new User_1.default();
+            var admin = new Users_1.User();
         admin.email = process.env.ADMIN_EMAIL;
         admin.username = process.env.ADMIN_USERNAME;
         admin.setPassword(process.env.ADMIN_PASSWORD);
@@ -77,18 +77,18 @@ app.use(function (req, res, next) {
     next(err);
 });
 if (app.get('env') === 'development') {
-    app.use(function (err, req, res, next) {
+    app.use(function (err, res) {
         res.status(err['status'] || 500);
         res.render('error', {
-            message: err.message,
+            message: err['message'],
             error: err
         });
     });
 }
-app.use(function (err, req, res, next) {
+app.use(function (err, res) {
     res.status(err['status'] || 500);
     res.render('error', {
-        message: err.message,
+        message: err['message'],
         error: {}
     });
 });

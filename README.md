@@ -51,15 +51,15 @@ import * as passport from 'passport';
 import * as mongoose from 'mongoose';
 let LocalStrategy = require('passport-local').Strategy;
 let FacebookStrategy = require('passport-facebook').Strategy;
-import User from '../models/Users';
+import {User, IUser} from '../models/Users';
 import * as jwt from 'jsonwebtoken';
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function(user: IUser, done) {
   // console.log('serializeUser', user);
   done(null, user);
 });
 
-passport.deserializeUser(function(obj, done) {
+passport.deserializeUser(function(obj: IUser, done) {
   User.findOne({_id: obj._id}, {passwordHash: 0, salt: 0}, (err, user) => {
     if (err) done(null, {});
     done(null, user);
@@ -70,7 +70,8 @@ passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
     callbackURL: process.env.ROOT_URL + "/auth/facebook/callback",
-    profileFields: ['id', 'displayName', 'photos']
+    profileFields: ['id', 'displayName', 'photos'],
+    display: 'popup'
   },
   function(accessToken, refreshToken, profile, done) {
     User.findOne({ facebookId: profile.id }, function (err, user) {
@@ -99,7 +100,6 @@ passport.use(new LocalStrategy(function(username: String, password: string, done
     return done(null, user);
   });
 }));
-
 ```
 
 *note:* Please note this line `.select('-passwordHash -salt');`.  This will prevent your `passport.authenticate` (*token checks*) from returning a passwordHash and salt.  !!!
@@ -121,8 +121,10 @@ import * as bodyParser from 'body-parser';
 import * as ejs from 'ejs';
 import * as mongoose from 'mongoose';
 import * as passport from 'passport';
+import * as session from 'express-session';
+const MongoStore = require('connect-mongo')(session);
 import routes from './routes/index';
-import User from './models/Users';
+import {User} from './models/Users';
 
 //create the app
 let app = express();
@@ -268,7 +270,7 @@ UserSchema.method('generateJWT', function() {
   }, process.env.JWT_SECRET, {expiresIn: '2 days'});
 });
 
-export default mongoose.model<IUser>("User", UserSchema);
+export const User = mongoose.model<IUser>("User", UserSchema);
 ```
 
 *note:* Methods are associated with the User model to assist the process of validating passwords, setting passwords hashes, and signing tokens.
@@ -281,11 +283,12 @@ import * as express from 'express';
 import * as mongoose from 'mongoose';
 import * as passport from 'passport';
 import * as jwt from 'jsonwebtoken';
-import User from '../models/Users';
+import * as session from 'express-session';
+import {User, IUser} from '../models/Users';
 let router = express.Router();
 
 //Express has Express.Request but the interface isn't very good...  requires overrides
-function setSession(req, res, next, user) {
+function setSession(req, res, next, user: IUser) {
   let token = user.generateJWT();
 
   return req.logIn(user, (err) => {
@@ -301,8 +304,8 @@ function destroySession(req, res, next) {
 
   req.session.destroy((err) => {
     if (err) return res.status(500).json({message: 'still authenticated, please try again.'});
-    req.user = null;
     req.logout();
+    req.user = null;
     return res.json({isAuthenticated: req.isAuthenticated()});
   });
 }

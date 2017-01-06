@@ -3,11 +3,11 @@ import * as mongoose from 'mongoose';
 import * as passport from 'passport';
 import * as jwt from 'jsonwebtoken';
 import * as session from 'express-session';
-import User from '../models/Users';
+import {User, IUser} from '../models/Users';
 let router = express.Router();
 
 //Express has Express.Request but the interface isn't very good...  requires overrides
-function setSession(req, res, next, user) {
+function setSession(req, res, next, user: IUser) {
   let token = user.generateJWT();
 
   return req.logIn(user, (err) => {

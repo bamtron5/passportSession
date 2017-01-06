@@ -2,12 +2,12 @@
 var passport = require("passport");
 var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
-var User_1 = require("../models/Users");
+var Users_1 = require("../models/Users");
 passport.serializeUser(function (user, done) {
     done(null, user);
 });
 passport.deserializeUser(function (obj, done) {
-    User_1.default.findOne({ _id: obj._id }, { passwordHash: 0, salt: 0 }, function (err, user) {
+    Users_1.User.findOne({ _id: obj._id }, { passwordHash: 0, salt: 0 }, function (err, user) {
         if (err)
             done(null, {});
         done(null, user);
@@ -20,12 +20,12 @@ passport.use(new FacebookStrategy({
     profileFields: ['id', 'displayName', 'photos'],
     display: 'popup'
 }, function (accessToken, refreshToken, profile, done) {
-    User_1.default.findOne({ facebookId: profile.id }, function (err, user) {
+    Users_1.User.findOne({ facebookId: profile.id }, function (err, user) {
         if (user) {
             return done(err, user);
         }
         else {
-            var u_1 = new User_1.default();
+            var u_1 = new Users_1.User();
             u_1.username = profile.displayName;
             u_1.facebookId = profile.id;
             u_1.facebook.name = profile.displayName;
@@ -39,7 +39,7 @@ passport.use(new FacebookStrategy({
     });
 }));
 passport.use(new LocalStrategy(function (username, password, done) {
-    User_1.default.findOne({ username: username }, function (err, user) {
+    Users_1.User.findOne({ username: username }, function (err, user) {
         if (err)
             return done(err);
         if (!user)

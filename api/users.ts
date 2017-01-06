@@ -4,14 +4,14 @@ import * as passport from 'passport';
 import * as jwt from 'jsonwebtoken';
 import * as session from 'express-session';
 import methods from './methods';
-import User from '../models/Users';
+import {User, IUser} from '../models/Users';
 let router = express.Router();
 
 router.get('/users/:id', function(req, res, next) {
   User.findOne(req.params._id).select('-passwordHash -salt').then((user) => {
     return res.status(200).json(user);
   }).catch((err) => {
-    return res.status(404).json({err: 'User not found.'})
+    return next({message: 'Error getting user.'});
   });
 });
 
@@ -31,19 +31,19 @@ router.post('/Register', function(req, res, next) {
   user.save(function(err, user) {
     console.log(err);
     if(err) return next(err);
-    res.status(200).json({message: "Registration complete."});
+    res.status(200).json({message: 'Registration complete.'});
   });
 });
 
 router.post('/login/local', function(req, res, next) {
   if(!req.body.username || !req.body.password){
-    return res.status(400).json({message: "Please fill out every field"});
+    return res.status(400).json({message: 'Please fill out every field'});
   }
 
   passport.authenticate('local', function(err, user, info) {
     if(err) return next(err);
     if(user) return methods.setSession(req, res, next, user);
-    return res.status(400).json(info);
+    return res.status(400).json({message: 'Incorrect Login'});
   })(req, res, next);
 });
 

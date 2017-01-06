@@ -31,5 +31,4 @@ UserSchema.method('generateJWT', function () {
         email: this.email
     }, process.env.JWT_SECRET, { expiresIn: '2 days' });
 });
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = mongoose.model("User", UserSchema);
+exports.User = mongoose.model("User", UserSchema);

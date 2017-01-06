@@ -54,4 +54,4 @@ UserSchema.method('generateJWT', function() {
   }, process.env.JWT_SECRET, {expiresIn: '2 days'});
 });
 
-export default mongoose.model<IUser>("User", UserSchema);
+export const User = mongoose.model<IUser>("User", UserSchema);
