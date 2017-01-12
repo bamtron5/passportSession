@@ -6,13 +6,15 @@ namespace passportDemo.Controllers {
     constructor(
       private UserService: passportDemo.Services.UserService,
       private $state: ng.ui.IStateService,
-      currentUser: ng.ui.IResolvedState
+      currentUser: ng.ui.IResolvedState,
+      private Session: passportDemo.Services.Session
     ) {
       this.currentUser = currentUser;
     }
 
     logout() {
       this.UserService.logout().then(() => {
+        this.Session.destroy();
         this.$state.go('main.home', null, {reload: true, notify:true});
       }).catch(() => {
         throw new Error('Unsuccessful logout');
@@ -24,10 +26,10 @@ namespace passportDemo.Controllers {
     public currentUser;
     constructor(
       private $state: ng.ui.IStateService,
-      currentUser: ng.ui.IResolvedState
+      Session: passportDemo.Services.Session
     ) {
 
-      this.currentUser = currentUser;
+      this.currentUser = Session.getUser();
     }
   }
 
@@ -38,6 +40,7 @@ namespace passportDemo.Controllers {
 
     public login(user) {
       this.UserService.login(user).then((res) => {
+        this.Session.create(res);
         this.$state.go('main.profile', null, {reload: true, notify:true});
       }).catch((err) => {
         alert('Bunk login, please try again.');
@@ -45,6 +48,7 @@ namespace passportDemo.Controllers {
     }
 
     public register(user) {
+      console.log(user);
       this.UserService.register(user).then((res) => {
         this.$state.go('main.login');
       }).catch((err) => {
@@ -54,7 +58,8 @@ namespace passportDemo.Controllers {
 
     constructor(
       private UserService:passportDemo.Services.UserService,
-      private $state: ng.ui.IStateService
+      private $state: ng.ui.IStateService,
+      private Session: passportDemo.Services.Session
     ) {
     }
   }

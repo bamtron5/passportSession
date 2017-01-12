@@ -1,6 +1,6 @@
 var passportDemo;
 (function (passportDemo) {
-    angular.module('passportDemo', ['ui.router', 'ngResource'])
+    angular.module('passportDemo', ['ui.router', 'ngResource', 'ngStorage'])
         .config(function ($resourceProvider, $stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
         $stateProvider
             .state('main', {
@@ -10,15 +10,15 @@ var passportDemo;
             controller: passportDemo.Controllers.MainController,
             controllerAs: 'vm',
             resolve: {
-                currentUser: [
-                    'UserService', '$state', function (UserService, $state) {
-                        return UserService.getCurrentUser(function (user) {
-                            return user;
-                        }).catch(function (e) {
-                            return { username: false };
-                        });
-                    }
-                ]
+                currentUser: ['Session', function (Session) {
+                        return Session.getUser();
+                    }],
+                isAuthenticated: ['Session', function (Session) {
+                        return Session.isAuthenticated();
+                    }],
+                currentNavItem: ['$state', function ($state) {
+                        return $state.current.name;
+                    }]
             }
         })
             .state('main.home', {
@@ -57,31 +57,51 @@ var passportDemo;
             rewriteLinks: false
         });
         $httpProvider.interceptors.push('authInterceptor');
-    }).factory('authInterceptor', ['$q', '$location',
-        function ($q, $location) {
-            return {
-                request: function (config) {
-                    config.headers = config.headers || {};
-                    return config;
-                },
-                responseError: function (response) {
-                    if (response.status === 401) {
-                        console.info("this account needs to authenticate to " + response.config.method + " " + response.config.url);
-                    }
-                    if (response.status === 403) {
-                        alert('unauthorized permission for your account.');
-                        return $q.reject(response);
+    })
+        .factory('_', ['$window',
+        function ($window) {
+            return $window._;
+        }
+    ])
+        .factory('authInterceptor', function ($rootScope, $q, AUTH_EVENTS) {
+        return {
+            responseError: function (response) {
+                $rootScope.$broadcast({
+                    401: AUTH_EVENTS.notAuthenticated,
+                    403: AUTH_EVENTS.notAuthorized,
+                    419: AUTH_EVENTS.sessionTimeout,
+                    440: AUTH_EVENTS.sessionTimeout
+                }[response.status], response);
+                return $q.reject(response);
+            }
+        };
+    })
+        .run([
+        '$rootScope',
+        'UserService',
+        '$sessionStorage',
+        'Session',
+        '$state',
+        '_',
+        'AUTH_EVENTS',
+        function ($rootScope, UserService, $sessionStorage, Session, $state, _, AUTH_EVENTS) {
+            $rootScope.$on('$stateChangeStart', function (event, next) {
+                UserService.getCurrentUser().then(function (user) {
+                    $sessionStorage.user = user;
+                }).catch(function (user) {
+                    $sessionStorage.user = user;
+                });
+                var authorizedRoles = !_.isUndefined(next.data, 'authorizedRoles')
+                    ? next.data.authorizedRoles : false;
+                if (authorizedRoles && !Session.isAuthorized(authorizedRoles)) {
+                    event.preventDefault();
+                    if (Session.isAuthenticated()) {
+                        $state.go('home');
                     }
                     else {
-                        return $q.reject(response);
+                        $state.go('home');
                     }
                 }
-            };
-        }])
-        .run([
-        '$rootScope', '$location', 'UserService', '$state', '$q',
-        function ($rootScope, $location, UserService, $state, $q) {
-            $rootScope.$on('$stateChangeStart', function (event, next) {
             });
         }
     ]);

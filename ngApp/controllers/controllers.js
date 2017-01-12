@@ -3,15 +3,17 @@ var passportDemo;
     var Controllers;
     (function (Controllers) {
         var MainController = (function () {
-            function MainController(UserService, $state, currentUser) {
+            function MainController(UserService, $state, currentUser, Session) {
                 this.UserService = UserService;
                 this.$state = $state;
+                this.Session = Session;
                 this.self = this;
                 this.currentUser = currentUser;
             }
             MainController.prototype.logout = function () {
                 var _this = this;
                 this.UserService.logout().then(function () {
+                    _this.Session.destroy();
                     _this.$state.go('main.home', null, { reload: true, notify: true });
                 }).catch(function () {
                     throw new Error('Unsuccessful logout');
@@ -21,21 +23,23 @@ var passportDemo;
         }());
         Controllers.MainController = MainController;
         var HomeController = (function () {
-            function HomeController($state, currentUser) {
+            function HomeController($state, Session) {
                 this.$state = $state;
-                this.currentUser = currentUser;
+                this.currentUser = Session.getUser();
             }
             return HomeController;
         }());
         Controllers.HomeController = HomeController;
         var UserController = (function () {
-            function UserController(UserService, $state) {
+            function UserController(UserService, $state, Session) {
                 this.UserService = UserService;
                 this.$state = $state;
+                this.Session = Session;
             }
             UserController.prototype.login = function (user) {
                 var _this = this;
                 this.UserService.login(user).then(function (res) {
+                    _this.Session.create(res);
                     _this.$state.go('main.profile', null, { reload: true, notify: true });
                 }).catch(function (err) {
                     alert('Bunk login, please try again.');
@@ -43,6 +47,7 @@ var passportDemo;
             };
             UserController.prototype.register = function (user) {
                 var _this = this;
+                console.log(user);
                 this.UserService.register(user).then(function (res) {
                     _this.$state.go('main.login');
                 }).catch(function (err) {
