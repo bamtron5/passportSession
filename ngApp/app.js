@@ -76,33 +76,24 @@ var passportDemo;
             }
         };
     })
-        .run([
-        '$rootScope',
-        'UserService',
-        '$sessionStorage',
-        'Session',
-        '$state',
-        '_',
-        'AUTH_EVENTS',
-        function ($rootScope, UserService, $sessionStorage, Session, $state, _, AUTH_EVENTS) {
-            $rootScope.$on('$stateChangeStart', function (event, next) {
-                UserService.getCurrentUser().then(function (user) {
-                    $sessionStorage.user = user;
-                }).catch(function (user) {
-                    $sessionStorage.user = user;
-                });
-                var authorizedRoles = !_.isUndefined(next.data, 'authorizedRoles')
-                    ? next.data.authorizedRoles : false;
-                if (authorizedRoles && !Session.isAuthorized(authorizedRoles)) {
-                    event.preventDefault();
-                    if (Session.isAuthenticated()) {
-                        $state.go('home');
-                    }
-                    else {
-                        $state.go('home');
-                    }
-                }
+        .run(function ($rootScope, UserService, $sessionStorage, Session, $state, _) {
+        $rootScope.$on('$stateChangeStart', function (event, next) {
+            UserService.getCurrentUser().then(function (user) {
+                $sessionStorage.user = user;
+            }).catch(function (user) {
+                $sessionStorage.user = user;
             });
-        }
-    ]);
+            var authorizedRoles = !_.isUndefined(next.data, 'authorizedRoles')
+                ? next.data.authorizedRoles : false;
+            if (authorizedRoles && !Session.isAuthorized(authorizedRoles)) {
+                event.preventDefault();
+                if (Session.isAuthenticated()) {
+                    $state.go('home');
+                }
+                else {
+                    $state.go('home');
+                }
+            }
+        });
+    });
 })(passportDemo || (passportDemo = {}));

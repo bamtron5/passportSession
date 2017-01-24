@@ -48,6 +48,10 @@ passport.use(new LocalStrategy(function(username: String, password: string, done
     if(err) return done(err);
     if(!user) return done(null, false, { message: 'Incorrect username.' });
     if(!user.validatePassword(password)) return done(null, false, { message: 'Password does not match.' });
+    // user.validatePassword(password).then((result) => {
+    //   if(!result) return done(null, false, { message: 'Password does not match.' });
+    //   return done(null, user);
+    // });
     return done(null, user);
   });
 }));

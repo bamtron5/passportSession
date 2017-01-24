@@ -40,14 +40,13 @@ var passportDemo;
                 var _this = this;
                 this.UserService.login(user).then(function (res) {
                     _this.Session.create(res);
-                    _this.$state.go('main.profile', null, { reload: true, notify: true });
+                    _this.$state.go('main.profile');
                 }).catch(function (err) {
                     alert('Bunk login, please try again.');
                 });
             };
             UserController.prototype.register = function (user) {
                 var _this = this;
-                console.log(user);
                 this.UserService.register(user).then(function (res) {
                     _this.$state.go('main.login');
                 }).catch(function (err) {

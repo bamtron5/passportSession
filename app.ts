@@ -10,6 +10,7 @@ import * as session from 'express-session';
 const MongoStore = require('connect-mongo')(session);
 import routes from './routes/index';
 import {User} from './models/Users';
+import UserApi from './api/users';
 
 //create the app
 let app = express();
@@ -83,7 +84,7 @@ app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 app.use('/ngApp', express.static(path.join(__dirname, 'ngApp')));
 
 //mount api
-app.use('/api', require('./api/users'));
+app.use('/api', UserApi);
 
 //routes
 app.use('/', routes);

@@ -5,7 +5,6 @@ namespace passportDemo.Services {
       private LogoutResource;
       private RegisterResource;
       public UserResource;
-      private isLoggedIn;
 
       public login(user) {
         return this.LoginResource.save(user).$promise;

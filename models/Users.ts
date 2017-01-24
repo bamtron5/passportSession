@@ -16,7 +16,7 @@ export interface IUser extends mongoose.Document {
   facebookId: String,
   facebook: IFacebook,
   setPassword(password: string): boolean,
-  validatePassword(password: string): boolean,
+  validatePassword(password: string): Promise<boolean>,
   generateJWT(): JsonWebKey,
   roles: Array<String>
 }
@@ -35,12 +35,12 @@ let UserSchema = new mongoose.Schema({
   roles: {type: Array, default: ['user']}
 });
 
-UserSchema.method('setPassword', function(password) {
+UserSchema.method('setPassword', function(password:string) {
   this.salt = crypto.randomBytes(16).toString('hex');
   this.passwordHash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
 });
 
-UserSchema.method('validatePassword', function(password) {
+UserSchema.method('validatePassword', function(password:string) {
   let hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
   return (hash === this.passwordHash);
 });

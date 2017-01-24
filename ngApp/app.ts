@@ -91,44 +91,34 @@ namespace passportDemo {
       };
     })
     .run(
-      [
-        '$rootScope',
-        'UserService',
-        '$sessionStorage',
-        'Session',
-        '$state',
-        '_',
-        'AUTH_EVENTS',
-        (
-          $rootScope,
-          UserService,
-          $sessionStorage,
-          Session,
-          $state: ng.ui.IStateService,
-          _,
-          AUTH_EVENTS
-        ) => {
-          $rootScope.$on('$stateChangeStart', (event, next) => {
-            UserService.getCurrentUser().then((user) => {
-              $sessionStorage.user = user;
-            }).catch((user) => {
-              $sessionStorage.user = user;
-            });
-            let authorizedRoles = !_.isUndefined(next.data, 'authorizedRoles')
-              ? next.data.authorizedRoles : false;
-            if (authorizedRoles && !Session.isAuthorized(authorizedRoles)) {
-              event.preventDefault();
-              if(Session.isAuthenticated()){
-                //TODO dialog
-                // $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
-                $state.go('home');
-              } else {
-                // $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
-                $state.go('home');
-              }
-            }
+      (
+        $rootScope,
+        UserService,
+        $sessionStorage,
+        Session,
+        $state: ng.ui.IStateService,
+        _
+      ) => {
+        $rootScope.$on('$stateChangeStart', (event, next) => {
+          UserService.getCurrentUser().then((user) => {
+            $sessionStorage.user = user;
+          }).catch((user) => {
+            $sessionStorage.user = user;
           });
-        }
-      ]
+          let authorizedRoles = !_.isUndefined(next.data, 'authorizedRoles')
+            ? next.data.authorizedRoles : false;
+          if (authorizedRoles && !Session.isAuthorized(authorizedRoles)) {
+            event.preventDefault();
+            if(Session.isAuthenticated()){
+              //TODO dialog
+              // $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+              $state.go('home');
+            } else {
+              // $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+              $state.go('home');
+            }
+          }
+        });
+      }
     );
 }

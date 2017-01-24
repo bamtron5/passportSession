@@ -9,6 +9,7 @@ var session = require("express-session");
 var MongoStore = require('connect-mongo')(session);
 var index_1 = require("./routes/index");
 var Users_1 = require("./models/Users");
+var users_1 = require("./api/users");
 var app = express();
 if (app.get('env') === 'development') {
     var dotenv = require('dotenv');
@@ -61,7 +62,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bower_components', express.static(path.join(__dirname, 'bower_components')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 app.use('/ngApp', express.static(path.join(__dirname, 'ngApp')));
-app.use('/api', require('./api/users'));
+app.use('/api', users_1.default);
 app.use('/', index_1.default);
 app.get('/*', function (req, res, next) {
     if (/.js|.html|.css|templates|js|scripts/.test(req.path) || req.xhr) {

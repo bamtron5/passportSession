@@ -41,14 +41,13 @@ namespace passportDemo.Controllers {
     public login(user) {
       this.UserService.login(user).then((res) => {
         this.Session.create(res);
-        this.$state.go('main.profile', null, {reload: true, notify:true});
+        this.$state.go('main.profile');
       }).catch((err) => {
         alert('Bunk login, please try again.');
       });
     }
 
     public register(user) {
-      console.log(user);
       this.UserService.register(user).then((res) => {
         this.$state.go('main.login');
       }).catch((err) => {
